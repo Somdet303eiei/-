@@ -1,0 +1,3116 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0B2545">
+    <title>ตลาดตั้งเซียอวด จังหวัดนครปฐม - ระบบจัดการการจองล็อกขายสินค้า</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            50: '#f0f4f8',
+                            100: '#d9e2ec',
+                            200: '#bcccdc',
+                            700: '#13315C',
+                            800: '#0B2545',
+                            900: '#071930',
+                            950: '#041020',
+                        },
+                        brandOrange: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            400: '#fb923c',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts: Prompt & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SQL.js (In-Browser Relational SQLite Engine compatible with ANSI SQL / MySQL / PostgreSQL) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js"></script>
+    <style>
+        html, body {
+            font-family: 'Prompt', 'Inter', sans-serif;
+            background-color: #f1f5f9;
+            max-width: 100vw;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: rgba(249, 115, 22, 0.2);
+            touch-action: manipulation;
+        }
+        /* Custom scrollbar for stall grid */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .stall-card {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .stall-card:hover {
+            transform: translateY(-2px);
+        }
+        #mobile-drawer {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        .safe-bottom-nav {
+            padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+        }
+        @media (max-width: 1023px) {
+            .has-mobile-dock {
+                padding-bottom: 5.5rem !important;
+            }
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased selection:bg-brandOrange-500 selection:text-white">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-4 right-4 z-[60] flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+
+    <!-- ========================================== -->
+    <!-- LANDING LOGIN SCREEN (หน้าแรกเข้าสู่ระบบ)   -->
+    <!-- ========================================== -->
+    <div id="landing-login-screen" class="min-h-screen bg-gradient-to-br from-navy-950 via-navy-800 to-navy-900 flex items-center justify-center p-4 sm:p-6">
+        <div class="max-w-5xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden border-2 border-brandOrange-500/40 grid grid-cols-1 lg:grid-cols-12">
+            
+            <!-- Left Column: Market Banner & Role Graphic -->
+            <div class="lg:col-span-6 bg-navy-900 text-white p-6 sm:p-8 flex flex-col items-center justify-between relative overflow-hidden">
+                <div class="w-full flex items-center justify-between z-10">
+                    <span class="px-3 py-1 rounded-full bg-brandOrange-500/20 border border-brandOrange-400/40 text-brandOrange-300 text-xs font-bold">
+                        <i class="fa-solid fa-store mr-1"></i> ตลาดตั้งเซียอวด จ.นครปฐม
+                    </span>
+                    <span class="text-xs text-navy-200 font-medium">200 ล็อกมาตรฐาน</span>
+                </div>
+
+                <!-- Market Promo Graphic with Interactive Overlay -->
+                <div class="my-5 w-full max-w-sm mx-auto relative rounded-2xl overflow-hidden shadow-2xl border-2 border-brandOrange-500 bg-white">
+                    <img src="images (1).jpeg"
+                         onerror="this.onerror=null; this.src='https://placehold.co/600x600/0B2545/F97316?text=%E0%B8%95%E0%B8%A5%E0%B8%B2%E0%B8%94%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B9%80%E0%B8%8B%E0%B8%B5%E0%B8%A2%E0%B8%AE%E0%B8%A7%E0%B8%94+%E0%B8%99%E0%B8%84%E0%B8%A3%E0%B8%9B%E0%B8%90%E0%B8%A1';"
+                         alt="ตลาดตั้งเซียฮวด นครปฐม ศูนย์รวมค้าหมูราคาส่ง"
+                         class="w-full h-auto object-cover block">
+                </div>
+
+                <div class="text-center z-10 space-y-1">
+                    <p class="text-sm font-bold text-brandOrange-400">ศูนย์รวมค้าหมูราคาส่ง & ตลาดสดครบวงจร</p>
+                    <p class="text-xs text-navy-200">ระบบจองล็อกขายสินค้า ชำระค่าเช่า ค่าน้ำ-ค่าไฟ และแผนที่นำทาง</p>
+                </div>
+
+                <!-- LINE OA Quick Contact Card -->
+                <div class="mt-4 w-full max-w-sm rounded-2xl bg-navy-950/80 border border-emerald-400/40 p-3.5 flex items-center gap-3.5 z-10">
+                    <img src="https://qr-official.line.me/gs/M_976tgkrb_GW.png?oat_content=qr"
+                         onerror="this.onerror=null; this.src='https://placehold.co/160x160/06C755/ffffff?text=LINE+OA';"
+                         alt="QR Code LINE OA ตลาดตั้งเซียฮวด"
+                         class="w-16 h-16 rounded-xl bg-white p-1 object-contain border border-emerald-400 shrink-0">
+                    <div class="text-left min-w-0 flex-1">
+                        <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#06C755]/20 text-emerald-300">
+                            <i class="fa-brands fa-line"></i> LINE Official Account
+                        </span>
+                        <p class="text-xs font-bold text-white mt-1 truncate">ติดต่อแอดมินผ่าน LINE OA</p>
+                        <p class="text-[11px] text-navy-200 leading-snug mt-0.5">สแกน QR หรือแอดไลน์สอบถามล็อกว่างและส่งสลิป</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Login & Customer Registration Form -->
+            <div class="lg:col-span-6 p-6 sm:p-8 flex flex-col justify-center bg-white">
+                <div class="mb-4 flex items-center gap-3.5">
+                    <img src="images (1).jpeg"
+                         onerror="this.onerror=null; this.src='https://placehold.co/120x120/0B2545/F97316?text=%E0%B8%95%E0%B8%8B%E0%B8%AE';"
+                         alt="โปรไฟล์เว็บตลาดตั้งเซียอวด"
+                         class="w-14 h-14 rounded-2xl object-cover border-2 border-brandOrange-500 shadow-sm shrink-0 bg-navy-900">
+                    <div>
+                        <h2 id="landing-form-heading" class="text-xl sm:text-2xl font-bold text-navy-900">เข้าสู่ระบบ (Login)</h2>
+                        <p id="landing-form-subheading" class="text-sm text-slate-500 mt-0.5">เลือกประเภทผู้ใช้งาน หรือสมัครสมาชิกใหม่สำหรับลูกค้า</p>
+                    </div>
+                </div>
+
+                <!-- Role Selector Tabs -->
+                <div class="grid grid-cols-2 gap-2.5 p-1.5 bg-navy-50 rounded-2xl border border-navy-100 mb-4">
+                    <button type="button" onclick="selectLandingTab('customer')" id="landing-tab-customer" class="py-3 px-3 rounded-xl text-xs sm:text-sm font-bold bg-navy-800 text-white shadow-md transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-user-tag text-brandOrange-400"></i>
+                        <span>สำหรับผู้ใช้ (User)</span>
+                    </button>
+                    <button type="button" onclick="selectLandingTab('admin')" id="landing-tab-admin" class="py-3 px-3 rounded-xl text-xs sm:text-sm font-bold text-navy-800 hover:bg-white/70 transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-user-shield text-brandOrange-600"></i>
+                        <span>สำหรับแอดมิน (Admin)</span>
+                    </button>
+                </div>
+
+                <!-- Customer Sub-Tabs: Login vs Register (Only visible when Customer role is selected) -->
+                <div id="customer-auth-mode-tabs" class="grid grid-cols-2 gap-2 mb-4 border-b border-slate-200 pb-3">
+                    <button type="button" onclick="switchCustomerAuthMode('login')" id="subtab-cust-login" class="py-2 px-3 rounded-xl text-xs font-bold bg-brandOrange-500 text-white shadow-xs transition">
+                        <i class="fa-solid fa-right-to-bracket mr-1"></i> เข้าสู่ระบบลูกค้า
+                    </button>
+                    <button type="button" onclick="switchCustomerAuthMode('register')" id="subtab-cust-register" class="py-2 px-3 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+                        <i class="fa-solid fa-user-plus mr-1"></i> สร้างบัญชีลูกค้าใหม่
+                    </button>
+                </div>
+
+                <!-- LOGIN FORM (Customer Login & Admin Login) -->
+                <form id="landing-login-form" onsubmit="handleLandingLogin(event)" class="space-y-4">
+                    <input type="hidden" id="landing-role-input" value="customer">
+
+                    <div>
+                        <label id="landing-user-label" class="block text-xs font-bold text-navy-900 mb-1.5">อีเมล หรือ เบอร์โทรศัพท์ผู้เช่า</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                                <i class="fa-solid fa-user"></i>
+                            </span>
+                            <input type="text" id="landing-username" required placeholder="กรอกอีเมล หรือ เบอร์โทรศัพท์ที่ลงทะเบียน" class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-brandOrange-500 focus:border-brandOrange-500">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-navy-900 mb-1.5">รหัสผ่าน</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                                <i class="fa-solid fa-lock"></i>
+                            </span>
+                            <input type="password" id="landing-password" required placeholder="กรอกรหัสผ่านของคุณ" class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-brandOrange-500 focus:border-brandOrange-500">
+                        </div>
+                    </div>
+
+                    <div id="landing-role-hint" class="p-3.5 rounded-xl bg-brandOrange-50 border border-brandOrange-200 text-navy-900 text-xs leading-relaxed">
+                        <i class="fa-solid fa-circle-info text-brandOrange-600 mr-1"></i> <strong>ยังไม่มีบัญชี?</strong> กดที่ปุ่ม <strong>"สร้างบัญชีลูกค้าใหม่"</strong> ด้านบนเพื่อลงทะเบียนชื่อ-นามสกุล อีเมล และเบอร์โทรของคุณได้ทันที
+                    </div>
+
+                    <button type="submit" class="w-full py-3.5 rounded-full bg-navy-900 hover:bg-brandOrange-500 active:scale-[0.99] text-white font-bold text-sm sm:text-base shadow-lg border-2 border-brandOrange-500 transition flex items-center justify-center gap-2">
+                        <span>เข้าสู่ระบบ (Login)</span>
+                        <i class="fa-solid fa-arrow-right text-brandOrange-400"></i>
+                    </button>
+
+                    <!-- Quick Demo Login for Customer -->
+                    <div id="customer-quick-box" class="pt-2">
+                        <button type="button" onclick="quickCustomerLogin()" class="w-full py-2 px-3 rounded-xl border border-navy-200 bg-navy-50 hover:bg-navy-100 text-navy-800 text-xs font-semibold transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-bolt text-brandOrange-500"></i> ทดลองเข้าใช้งานด้วยบัญชีผู้เช่าตัวอย่าง (สมชาย ขายดี)
+                        </button>
+                    </div>
+                </form>
+
+                <!-- CUSTOMER REGISTRATION FORM (สร้างบัญชีของลูกค้าเอง) -->
+                <form id="landing-register-form" onsubmit="handleCustomerRegister(event)" class="hidden space-y-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-navy-900 mb-1">ชื่อจริง <span class="text-rose-500">*</span></label>
+                            <input type="text" id="reg-firstname" required placeholder="เช่น วิชัย" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-brandOrange-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-navy-900 mb-1">นามสกุล <span class="text-rose-500">*</span></label>
+                            <input type="text" id="reg-lastname" required placeholder="เช่น รุ่งเรือง" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-brandOrange-500">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-navy-900 mb-1">อีเมล (Email) <span class="text-rose-500">*</span></label>
+                            <input type="email" id="reg-email" required placeholder="example@email.com" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-brandOrange-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-navy-900 mb-1">เบอร์โทรศัพท์ <span class="text-rose-500">*</span></label>
+                            <input type="tel" id="reg-phone" required placeholder="08X-XXX-XXXX" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-brandOrange-500">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-navy-900 mb-1">ตั้งรหัสผ่าน <span class="text-rose-500">*</span></label>
+                        <input type="password" id="reg-password" required minlength="4" placeholder="ตั้งรหัสผ่านสำหรับเข้าสู่ระบบ (อย่างน้อย 4 ตัวอักษร)" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-brandOrange-500">
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-navy-900 mb-1">ชื่อร้านค้า (ถ้ามี)</label>
+                            <input type="text" id="reg-shopname" placeholder="เช่น ร้านเจ๊พร หมูสด" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-brandOrange-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-navy-900 mb-1">ประเภทสินค้า / ข้อมูลเพิ่มเติม</label>
+                            <input type="text" id="reg-details" placeholder="เช่น อาหารสด, เสื้อผ้า, ที่อยู่" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-brandOrange-500">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full py-3 rounded-full bg-brandOrange-500 hover:bg-brandOrange-600 active:scale-[0.99] text-white font-bold text-sm sm:text-base shadow-lg transition flex items-center justify-center gap-2 mt-2">
+                        <i class="fa-solid fa-user-check"></i>
+                        <span>สมัครสมาชิกและเข้าสู่ระบบทันที</span>
+                    </button>
+                </form>
+
+                <!-- Quick Admin Demo (Only for Admin testing) -->
+                <div id="admin-quick-box" class="hidden mt-5 pt-4 border-t border-slate-100">
+                    <button type="button" onclick="quickAdminLogin()" class="w-full py-2.5 px-3 rounded-xl border border-brandOrange-200 bg-brandOrange-50 hover:bg-brandOrange-100 text-brandOrange-700 text-xs font-semibold transition flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-shield-halved text-navy-800"></i> เข้าสู่ระบบหลังบ้านแอดมินทันที (Admin Demo)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MAIN APPLICATION WRAPPER (แสดงหลังล็อกอิน)   -->
+    <!-- ========================================== -->
+    <div id="main-app-wrapper" class="hidden min-h-screen flex flex-col max-w-full overflow-x-hidden has-mobile-dock">
+
+        <!-- Top Navigation Bar with Hamburger Button (Navy Blue & Orange) -->
+        <header class="bg-gradient-to-r from-navy-950 via-navy-800 to-navy-700 text-white shadow-lg sticky top-0 z-40 border-b-2 border-brandOrange-500">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <!-- Left: Hamburger Menu Button (ปุ่ม 3 ขีด) & Market Profile -->
+                    <div class="flex items-center gap-3">
+                        <button id="hamburger-btn" onclick="toggleMenu()" aria-label="เปิดเมนู" class="p-2.5 rounded-xl bg-white/10 hover:bg-brandOrange-500 text-white active:scale-95 transition focus:outline-none focus:ring-2 focus:ring-brandOrange-400">
+                            <!-- 3-Line Hamburger SVG Icon -->
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path>
+                            </svg>
+                        </button>
+                        <div class="flex items-center gap-3 cursor-pointer" onclick="navigateTo('booking')">
+                            <!-- Market Profile Avatar -->
+                            <img src="images (1).jpeg" onerror="this.onerror=null; this.src='https://placehold.co/100x100/0B2545/F97316?text=%E0%B8%95%E0%B8%8B%E0%B8%AE';" alt="โปรไฟล์ตลาดตั้งเซียอวด" class="w-10 h-10 rounded-full object-cover border-2 border-brandOrange-500 shadow-sm bg-white">
+                            <div>
+                                <h1 class="font-bold text-base sm:text-lg leading-tight tracking-wide text-white">ตลาดตั้งเซียอวด</h1>
+                                <p class="text-xs text-brandOrange-400 font-medium">จังหวัดนครปฐม • ระบบจองล็อก & ชำระเงิน</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: User Role Badge & Logout/Switch Button -->
+                    <div class="flex items-center gap-2 sm:gap-3">
+                        <button onclick="navigateTo('database')" title="ดูโครงสร้างฐานข้อมูลเชิงสัมพันธ์ (SQL)" class="hidden md:flex items-center gap-1.5 bg-emerald-950/80 hover:bg-emerald-900 px-3 py-1.5 rounded-full border border-emerald-500/50 text-xs text-emerald-300 transition">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span id="db-engine-badge" class="font-semibold">SQL Relational DB</span>
+                        </button>
+                        <div id="user-badge" class="hidden sm:flex items-center gap-2 bg-navy-950/70 px-3.5 py-1.5 rounded-full border border-brandOrange-500/40 text-xs">
+                            <span id="role-dot" class="w-2 h-2 rounded-full bg-brandOrange-500"></span>
+                            <span id="current-user-name" class="font-medium text-white">สมชาย ขายดี</span>
+                        </div>
+                        <button id="auth-header-btn" onclick="logoutToLanding()" class="px-3.5 py-2 rounded-xl bg-brandOrange-500 hover:bg-brandOrange-600 text-white font-semibold text-xs sm:text-sm shadow transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                            <span id="auth-btn-text">ออกจากระบบ</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Slide-out Hamburger Navigation Drawer -->
+        <div id="drawer-backdrop" onclick="toggleMenu()" class="fixed inset-0 bg-navy-950/60 backdrop-blur-xs z-40 hidden transition-opacity"></div>
+        <aside id="mobile-drawer" class="fixed top-0 left-0 h-full w-76 bg-white shadow-2xl z-50 transform -translate-x-full flex flex-col justify-between">
+            <div>
+                <!-- Drawer Header -->
+                <div class="p-5 bg-navy-900 text-white flex items-center justify-between border-b-2 border-brandOrange-500">
+                    <div class="flex items-center gap-2.5">
+                        <i class="fa-solid fa-bars text-brandOrange-500 text-lg"></i>
+                        <span class="font-bold text-lg">เมนูหลักตลาด</span>
+                    </div>
+                    <button onclick="toggleMenu()" class="p-2 rounded-lg hover:bg-white/10 text-white">
+                        <i class="fa-solid fa-xmark text-xl"></i>
+                    </button>
+                </div>
+
+                <!-- Market & User Profile Summary inside Drawer -->
+                <div class="p-4 bg-navy-50 border-b border-navy-100">
+                    <div class="flex items-center gap-3">
+                        <img src="images (1).jpeg" onerror="this.onerror=null; this.src='https://placehold.co/100x100/0B2545/F97316?text=%E0%B8%95%E0%B8%8B%E0%B8%AE';" alt="โปรไฟล์ตลาด" class="w-12 h-12 rounded-full object-cover border-2 border-brandOrange-500 shadow-xs bg-white shrink-0">
+                        <div class="min-w-0">
+                            <p id="drawer-user-title" class="font-bold text-sm text-navy-900 truncate">ผู้ใช้งาน</p>
+                            <p id="drawer-user-role" class="text-xs text-brandOrange-600 font-semibold">สิทธิ์: ลูกค้า / ผู้เช่าล็อก</p>
+                            <p id="drawer-user-contact" class="text-[11px] text-slate-500 truncate">ตลาดตั้งเซียอวด จ.นครปฐม</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="p-3 space-y-1.5">
+                    <button onclick="navigateTo('booking'); toggleMenu();" id="nav-booking" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-semibold text-sm bg-navy-800 text-white shadow-xs">
+                        <i class="fa-solid fa-table-cells w-5 text-center text-brandOrange-400"></i>
+                        <span>ผังจองล็อกตลาด (200 ล็อก)</span>
+                    </button>
+                    <button onclick="navigateTo('payments'); toggleMenu();" id="nav-payments" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-medium text-sm text-slate-700 hover:bg-navy-50">
+                        <i class="fa-solid fa-file-invoice-dollar w-5 text-center text-brandOrange-500"></i>
+                        <span>จ่ายค่าเช่าล็อก & ค่าน้ำ-ค่าไฟ</span>
+                    </button>
+                    <button onclick="navigateTo('map'); toggleMenu();" id="nav-map" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-medium text-sm text-slate-700 hover:bg-navy-50">
+                        <i class="fa-solid fa-map-location-dot w-5 text-center text-navy-700"></i>
+                        <span>แผนที่นำทางไปตลาดตั้งเซียฮวด</span>
+                    </button>
+                    <button onclick="navigateTo('database'); toggleMenu();" id="nav-database" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-medium text-sm text-emerald-800 bg-emerald-50/70 hover:bg-emerald-100 border border-emerald-200">
+                        <i class="fa-solid fa-database w-5 text-center text-emerald-600"></i>
+                        <span>ฐานข้อมูลเชิงสัมพันธ์ (SQL / ER)</span>
+                    </button>
+                    <!-- Admin Only Menu Item -->
+                    <button onclick="navigateTo('admin'); toggleMenu();" id="nav-admin" class="nav-item hidden w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-bold text-sm text-brandOrange-700 bg-brandOrange-50 hover:bg-brandOrange-100 border border-brandOrange-200">
+                        <i class="fa-solid fa-shield-halved w-5 text-center text-brandOrange-600"></i>
+                        <span>ระบบหลังบ้าน (Admin)</span>
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Drawer Footer -->
+            <div class="p-4 border-t border-slate-200 bg-slate-50 space-y-2.5">
+                <a href="https://line.me/R/ti/p/%40976tgkrb" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 rounded-xl bg-[#06C755] hover:bg-[#05b34c] text-white font-bold text-sm shadow transition flex items-center justify-center gap-2">
+                    <i class="fa-brands fa-line text-lg"></i>
+                    <span>ติดต่อทาง LINE OA</span>
+                </a>
+                <button id="drawer-auth-btn" onclick="toggleMenu(); logoutToLanding();" class="w-full py-2.5 px-4 rounded-xl bg-navy-800 hover:bg-navy-900 text-white font-semibold text-sm shadow transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-right-from-bracket text-brandOrange-400"></i>
+                    <span>ออกจากระบบ / เปลี่ยนบัญชี</span>
+                </button>
+                <p class="text-[11px] text-center text-slate-400 mt-2">ตลาดตั้งเซียอวด (ทุ่งพระเมรุ) จ.นครปฐม</p>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 flex-1 min-w-0">
+
+            <!-- SECTION 1: STALL BOOKING & 200 STALLS GRID -->
+            <section id="section-booking" class="space-y-6">
+                <!-- Hero Banner & Stats -->
+                <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200">
+                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        <div class="flex items-start sm:items-center gap-4">
+                            <img src="images (1).jpeg" onerror="this.onerror=null; this.src='https://placehold.co/120x120/0B2545/F97316?text=%E0%B8%95%E0%B8%8B%E0%B8%AE';" alt="โลโก้ตลาด" class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-brandOrange-500 shadow-md shrink-0 hidden sm:block">
+                            <div>
+                                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brandOrange-100 text-brandOrange-700 text-xs font-bold mb-1.5">
+                                    <i class="fa-solid fa-circle-check"></i> เปิดให้จองพื้นที่ขายสินค้าประจำเดือน
+                                </div>
+                                <h2 class="text-xl sm:text-2xl font-bold text-navy-900">ผังจองล็อกขายสินค้า ตลาดตั้งเซียอวด จ.นครปฐม</h2>
+                                <p class="text-sm text-slate-500 mt-1">เลือกโซนและหมายเลขล็อกที่ต้องการจากทั้งหมด 200 ล็อก คลิกที่ล็อกว่างเพื่อทำการจอง</p>
+                            </div>
+                        </div>
+                        <!-- Live Counters -->
+                        <div class="grid grid-cols-3 gap-2 sm:gap-3 shrink-0">
+                            <div class="bg-navy-50 border border-navy-200 rounded-xl p-3 text-center">
+                                <p class="text-xs text-navy-700 font-medium">ทั้งหมด</p>
+                                <p class="text-lg sm:text-xl font-bold text-navy-900">200</p>
+                            </div>
+                            <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-center">
+                                <p class="text-xs text-emerald-700 font-medium">ล็อกว่าง</p>
+                                <p id="stat-available" class="text-lg sm:text-xl font-bold text-emerald-700">0</p>
+                            </div>
+                            <div class="bg-brandOrange-50 border border-brandOrange-200 rounded-xl p-3 text-center">
+                                <p class="text-xs text-brandOrange-700 font-medium">จองแล้ว</p>
+                                <p id="stat-occupied" class="text-lg sm:text-xl font-bold text-brandOrange-600">0</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Zone Filters & Search -->
+                    <div class="mt-6 pt-5 border-t border-slate-100 flex flex-col md:flex-row gap-3 justify-between items-stretch md:items-center">
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="filterZone('ALL')" id="zone-btn-ALL" class="zone-filter-btn px-3.5 py-2.5 rounded-xl text-xs font-bold bg-navy-800 text-white shadow-xs min-h-[40px]">ทั้งหมด (200)</button>
+                            <button onclick="filterZone('A')" id="zone-btn-A" class="zone-filter-btn px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 min-h-[40px]">โซน A: อาหารสด/ค้าส่งหมู (A01-A50)</button>
+                            <button onclick="filterZone('B')" id="zone-btn-B" class="zone-filter-btn px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 min-h-[40px]">โซน B: อาหารปรุงสำเร็จ (B01-B50)</button>
+                            <button onclick="filterZone('C')" id="zone-btn-C" class="zone-filter-btn px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 min-h-[40px]">โซน C: เสื้อผ้า/แฟชั่น (C01-C50)</button>
+                            <button onclick="filterZone('D')" id="zone-btn-D" class="zone-filter-btn px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 min-h-[40px]">โซน D: สินค้าเบ็ดเตล็ด (D01-D50)</button>
+                        </div>
+                        <div class="flex flex-wrap sm:flex-nowrap gap-2 w-full md:w-auto">
+                            <select id="status-filter" onchange="renderStalls()" class="flex-1 sm:flex-none px-3 py-2.5 rounded-xl border border-slate-300 text-xs font-medium bg-white min-h-[42px] focus:outline-none focus:ring-2 focus:ring-brandOrange-500">
+                                <option value="ALL">สถานะ: ทั้งหมด</option>
+                                <option value="available">เฉพาะล็อกว่าง</option>
+                                <option value="occupied">เฉพาะล็อกไม่ว่าง</option>
+                            </select>
+                            <input type="text" id="search-stall" oninput="renderStalls()" placeholder="ค้นหาเลขล็อก เช่น A05..." class="flex-1 sm:flex-none px-3 py-2.5 rounded-xl border border-slate-300 text-xs w-full sm:w-44 min-h-[42px] focus:outline-none focus:ring-2 focus:ring-brandOrange-500">
+                        </div>
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="mt-4 flex flex-wrap items-center gap-4 text-xs text-slate-600">
+                        <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-emerald-500 inline-block"></span> ล็อกว่าง (คลิกเพื่อจอง)</span>
+                        <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-amber-400 inline-block"></span> กำลังตรวจสอบ (รอแอดมินยืนยัน)</span>
+                        <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-navy-800 inline-block"></span> สำเร็จ / มีผู้เช่าแล้ว</span>
+                        <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-brandOrange-500 inline-block"></span> ล็อกของคุณ</span>
+                    </div>
+                </div>
+
+                <!-- 200 Stalls Grid Container -->
+                <div id="stalls-grid" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2 sm:gap-2.5">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </section>
+
+            <!-- SECTION 2: RENTAL & UTILITY PAYMENTS (ค่าน้ำ ค่าไฟ ค่าเช่าล็อก) -->
+            <section id="section-payments" class="hidden space-y-6">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100">
+                        <div>
+                            <h2 class="text-xl font-bold text-navy-900"><i class="fa-solid fa-file-invoice-dollar text-brandOrange-500 mr-2"></i>ระบบชำระค่าเช่าล็อก และค่าน้ำ-ค่าไฟ</h2>
+                            <p class="text-sm text-slate-500 mt-1">ตรวจสอบบิลค่าเช่ารายเดือน ค่าน้ำประปา และค่าไฟฟ้า พร้อมชำระเงินออนไลน์ผ่าน QR PromptPay</p>
+                        </div>
+                        <div id="payment-user-notice" class="bg-navy-50 border border-navy-200 px-4 py-2 rounded-xl text-xs font-medium text-navy-800">
+                            กำลังแสดงรายการบิลของบัญชีปัจจุบัน
+                        </div>
+                    </div>
+
+                    <!-- Summary Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 my-6">
+                        <div class="p-4 rounded-2xl bg-gradient-to-br from-navy-800 to-navy-950 text-white shadow-sm">
+                            <p class="text-xs font-medium text-navy-200">ยอดค้างชำระทั้งหมด</p>
+                            <p id="total-unpaid-amount" class="text-2xl font-bold text-brandOrange-400 mt-1">฿0.00</p>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-navy-50 border border-navy-200">
+                            <p class="text-xs font-medium text-navy-700">อัตราค่าน้ำประปา</p>
+                            <p class="text-lg font-bold text-navy-900 mt-1">18 บาท / หน่วย</p>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-brandOrange-50 border border-brandOrange-200">
+                            <p class="text-xs font-medium text-brandOrange-700">อัตราค่าไฟฟ้า</p>
+                            <p class="text-lg font-bold text-brandOrange-700 mt-1">7 บาท / หน่วย</p>
+                        </div>
+                    </div>
+
+                    <!-- Bills Table -->
+                    <div class="overflow-x-auto rounded-xl border border-slate-200">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-navy-900 text-white text-xs uppercase">
+                                    <th class="py-3.5 px-4 font-semibold">เลขที่บิล / รอบเดือน</th>
+                                    <th class="py-3.5 px-4 font-semibold">ล็อก / ผู้เช่า</th>
+                                    <th class="py-3.5 px-4 font-semibold text-right">ค่าเช่าล็อก</th>
+                                    <th class="py-3.5 px-4 font-semibold text-right">ค่าน้ำประปา</th>
+                                    <th class="py-3.5 px-4 font-semibold text-right">ค่าไฟฟ้า</th>
+                                    <th class="py-3.5 px-4 font-semibold text-right">รวมสุทธิ</th>
+                                    <th class="py-3.5 px-4 font-semibold text-center">สถานะ</th>
+                                    <th class="py-3.5 px-4 font-semibold text-center">ดำเนินการ / ใบเสร็จ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bills-table-body" class="divide-y divide-slate-200 text-sm bg-white">
+                                <!-- Populated via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Customer Receipts Vault (เก็บใบเสร็จไว้ในบัญชีของลูกค้าเสมอ) -->
+                    <div id="customer-receipts-vault" class="mt-8 pt-6 border-t border-slate-200">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                            <div>
+                                <h3 class="text-base font-bold text-navy-900">
+                                    <i class="fa-solid fa-receipt text-emerald-600 mr-2"></i>สมุดเก็บใบเสร็จและสลิปการชำระเงินในบัญชีลูกค้า
+                                </h3>
+                                <p class="text-xs text-slate-500 mt-0.5">
+                                    ใบเสร็จและรูปสลิปที่ชำระแล้วจะถูกบันทึกไว้ในบัญชีและสำรองข้อมูลอัตโนมัติ แม้ปิดหรือเปิดเบราว์เซอร์ใหม่
+                                </p>
+                            </div>
+                            <span id="receipts-count-badge" class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold self-start sm:self-auto">
+                                0 ใบเสร็จ
+                            </span>
+                        </div>
+                        <div id="customer-receipts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 3: MARKET LOCATION & MAP (แผนที่นำทางไปตลาดตั้งเซียฮวด) -->
+            <section id="section-map" class="hidden space-y-6">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-slate-100">
+                        <div>
+                            <h2 class="text-xl font-bold text-navy-900"><i class="fa-solid fa-map-location-dot text-brandOrange-500 mr-2"></i>แผนที่นำทางไปตลาดตั้งเซียอวด (ตั้งเซียฮวด) จ.นครปฐม</h2>
+                            <p class="text-sm text-slate-500 mt-1">ตั้งอยู่บริเวณถนนทุ่งพระเมรุ ตำบลห้วยจรเข้ อำเภอเมืองนครปฐม จังหวัดนครปฐม</p>
+                        </div>
+                        <a href="https://www.google.com/maps/search/?api=1&query=ตลาดตั้งเซียฮวด+นครปฐม" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-brandOrange-500 hover:bg-brandOrange-600 text-white font-bold text-sm shadow transition shrink-0">
+                            <i class="fa-solid fa-diamond-turn-right"></i>
+                            <span>เปิดนำทางด้วย Google Maps</span>
+                        </a>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
+                        <!-- Embedded Google Map -->
+                        <div class="lg:col-span-8 rounded-2xl overflow-hidden border-2 border-navy-100 shadow-sm min-h-[340px] bg-slate-100">
+                            <iframe 
+                                title="แผนที่ตลาดตั้งเซียฮวด นครปฐม"
+                                src="https://maps.google.com/maps?q=%E0%B8%95%E0%B8%A5%E0%B8%B2%E0%B8%94%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B9%80%E0%B8%8B%E0%B8%B5%E0%B8%A2%E0%B8%AE%E0%B8%A7%E0%B8%94%20%E0%B8%99%E0%B8%84%E0%B8%A3%E0%B8%9B%E0%B8%90%E0%B8%A1&t=&z=16&ie=UTF8&iwloc=&output=embed" 
+                                class="w-full h-full min-h-[340px] border-0" 
+                                allowfullscreen="" 
+                                loading="lazy">
+                            </iframe>
+                        </div>
+
+                        <!-- Market Info & Contact Card -->
+                        <div class="lg:col-span-4 space-y-4">
+                            <div class="p-5 rounded-2xl bg-navy-900 text-white space-y-3 border-b-4 border-brandOrange-500">
+                                <h3 class="font-bold text-base text-brandOrange-400 flex items-center gap-2">
+                                    <i class="fa-solid fa-circle-info"></i> ข้อมูลการติดต่อและเวลาทำการ
+                                </h3>
+                                <div class="space-y-2.5 text-xs text-navy-100">
+                                    <p class="flex items-start gap-2.5">
+                                        <i class="fa-solid fa-location-dot text-brandOrange-400 mt-0.5"></i>
+                                        <span>ถนนทุ่งพระเมรุ ต.ห้วยจรเข้ อ.เมืองนครปฐม จ.นครปฐม 73000</span>
+                                    </p>
+                                    <p class="flex items-start gap-2.5">
+                                        <i class="fa-solid fa-clock text-brandOrange-400 mt-0.5"></i>
+                                        <span>เปิดให้บริการทุกวัน เวลา 02:00 น. – 20:00 น. (โซนค้าส่งเปิดตั้งแต่ 02:00 น.)</span>
+                                    </p>
+                                    <p class="flex items-start gap-2.5">
+                                        <i class="fa-solid fa-phone text-brandOrange-400 mt-0.5"></i>
+                                        <span>สำนักงานตลาด: 034-251-XXX / 089-999-8888</span>
+                                    </p>
+                                    <p class="flex items-start gap-2.5">
+                                        <i class="fa-brands fa-line text-[#06C755] text-base mt-0.5"></i>
+                                        <span>LINE Official Account: สแกน QR หรือกดปุ่มเพิ่มเพื่อนด้านล่าง</span>
+                                    </p>
+                                    <p class="flex items-start gap-2.5">
+                                        <i class="fa-solid fa-square-parking text-brandOrange-400 mt-0.5"></i>
+                                        <span>มีลานจอดรถรองรับรถกระบะส่งสินค้าและลูกค้ามากกว่า 150 คัน</span>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- LINE OA QR & Direct Add Friend Card -->
+                            <div class="p-5 rounded-2xl bg-emerald-50/70 border-2 border-[#06C755]/40 space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="font-bold text-sm text-navy-900 flex items-center gap-1.5">
+                                        <i class="fa-brands fa-line text-[#06C755] text-lg"></i>ช่องทางติดต่อ LINE OA ตลาด
+                                    </h4>
+                                    <span class="px-2 py-0.5 rounded-full bg-[#06C755] text-white text-[10px] font-bold">ทางการ</span>
+                                </div>
+                                <div class="flex items-center gap-3.5">
+                                    <img src="https://qr-official.line.me/gs/M_976tgkrb_GW.png?oat_content=qr"
+                                         onerror="this.onerror=null; this.src='https://placehold.co/180x180/06C755/ffffff?text=LINE+OA';"
+                                         alt="QR Code LINE OA ตลาดตั้งเซียอวด"
+                                         class="w-24 h-24 rounded-xl bg-white p-1.5 border border-emerald-300 shadow-2xs object-contain shrink-0">
+                                    <div class="space-y-1.5 text-xs">
+                                        <p class="font-bold text-navy-900">สแกน QR เพื่อแอด LINE OA</p>
+                                        <p class="text-slate-600 leading-relaxed">สอบถามล็อกว่าง แจ้งซ่อมบำรุง หรือส่งหลักฐานการโอนเงินให้เจ้าหน้าที่</p>
+                                        <a href="https://line.me/R/ti/p/%40976tgkrb" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#06C755] hover:bg-[#05b34c] text-white font-bold text-xs shadow-xs transition mt-1">
+                                            <i class="fa-brands fa-line text-sm"></i>
+                                            <span>เปิดแชท LINE OA</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="p-5 rounded-2xl bg-brandOrange-50 border border-brandOrange-200 space-y-2">
+                                <h4 class="font-bold text-sm text-navy-900"><i class="fa-solid fa-truck-fast text-brandOrange-600 mr-1.5"></i>จุดรับ-ส่งสินค้า</h4>
+                                <p class="text-xs text-slate-600 leading-relaxed">
+                                    ผู้เช่าโซน A (อาหารสด/ค้าส่งหมู) สามารถนำรถเข้าเทียบท่าโหลดสินค้าด้านหลังโซน A ได้ตั้งแต่เวลา 01:30 - 06:00 น. ของทุกวัน
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 4: ADMIN BACKEND DASHBOARD (ระบบหลังบ้านสำหรับแอดมิน) -->
+            <section id="section-admin" class="hidden space-y-6">
+                <!-- Admin Header & Quick Stats -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100">
+                        <div>
+                            <span class="px-2.5 py-1 rounded-full bg-brandOrange-100 text-brandOrange-700 text-xs font-bold">ADMIN CONTROL PANEL</span>
+                            <h2 class="text-xl font-bold text-navy-900 mt-1.5">ระบบบริหารจัดการตลาดตั้งเซียอวด (หลังบ้าน)</h2>
+                            <p class="text-sm text-slate-500">ตรวจสอบและยืนยันคำขอเช่าล็อก (สำเร็จ / ไม่สำเร็จ) จัดการล็อก และออกบิลค่าน้ำ-ค่าไฟ</p>
+                        </div>
+                        <button onclick="openCreateBillModal()" class="px-4 py-2.5 rounded-xl bg-brandOrange-500 hover:bg-brandOrange-600 text-white font-bold text-sm shadow transition flex items-center gap-2 shrink-0">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>ออกบิลค่าเช่า / ค่าน้ำ-ค่าไฟ</span>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+                        <div class="p-4 rounded-2xl bg-amber-50 border border-amber-300">
+                            <p class="text-xs text-amber-800 font-semibold">คำขอรอตรวจสอบ</p>
+                            <p id="admin-stat-pending" class="text-2xl font-bold text-amber-700 mt-1">0 รายการ</p>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-navy-900 text-white">
+                            <p class="text-xs text-navy-200">เช่าสำเร็จ / มีผู้เช่า</p>
+                            <p id="admin-stat-occupied" class="text-2xl font-bold text-brandOrange-400 mt-1">0 / 200</p>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200">
+                            <p class="text-xs text-emerald-700 font-medium">รายรับที่ชำระแล้ว</p>
+                            <p id="admin-stat-paid" class="text-2xl font-bold text-emerald-700 mt-1">฿0</p>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-navy-50 border border-navy-200">
+                            <p class="text-xs text-navy-700 font-medium">ยอดบิลค้างชำระ</p>
+                            <p id="admin-stat-unpaid" class="text-2xl font-bold text-navy-900 mt-1">฿0</p>
+                            <p id="admin-stat-users" class="text-[11px] text-slate-500 mt-1">สมาชิก: 0 คน</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pending Stall Booking Approvals Queue (คิวรอยืนยันจากแอดมิน) -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border-2 border-amber-300/80">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                        <div>
+                            <h3 class="font-bold text-base text-navy-900 flex items-center gap-2">
+                                <i class="fa-solid fa-hourglass-half text-amber-500"></i>
+                                <span>คำขอเช่าล็อกที่รอแอดมินตรวจสอบ (สถานะ: กำลังตรวจสอบ)</span>
+                            </h3>
+                            <p class="text-xs text-slate-500 mt-0.5">กด "ยืนยันสำเร็จ" เพื่ออนุมัติให้เข้าเช่าขายได้ หรือกด "ไม่สำเร็จ" เพื่อปฏิเสธคำขอและคืนสถานะล็อกว่าง</p>
+                        </div>
+                        <span id="admin-pending-badge" class="px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold self-start sm:self-auto">0 รายการ</span>
+                    </div>
+                    <div id="admin-pending-bookings-list" class="space-y-3">
+                        <!-- Populated via JS -->
+                    </div>
+                </div>
+
+                <!-- Admin Management Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- Occupied Stalls Management -->
+                    <div class="lg:col-span-7 bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-bold text-base text-navy-900"><i class="fa-solid fa-store text-brandOrange-500 mr-2"></i>รายการล็อกที่มีผู้เช่าปัจจุบัน</h3>
+                            <input type="text" id="admin-search-stall" oninput="renderAdminDashboard()" placeholder="ค้นหาล็อก / ชื่อผู้เช่า..." class="px-3 py-1.5 rounded-lg border border-slate-300 text-xs w-44">
+                        </div>
+                        <div class="overflow-x-auto max-h-[380px] rounded-xl border border-slate-200">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead class="bg-navy-800 text-white sticky top-0">
+                                    <tr>
+                                        <th class="py-2.5 px-3">ล็อก</th>
+                                        <th class="py-2.5 px-3">ผู้เช่า / ร้านค้า</th>
+                                        <th class="py-2.5 px-3">เบอร์โทร</th>
+                                        <th class="py-2.5 px-3 text-right">ค่าเช่า/เดือน</th>
+                                        <th class="py-2.5 px-3 text-center">จัดการ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-stalls-tbody" class="divide-y divide-slate-200">
+                                    <!-- Populated via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Registered Users List -->
+                    <div class="lg:col-span-5 bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                        <h3 class="font-bold text-base text-navy-900 mb-4"><i class="fa-solid fa-users text-navy-700 mr-2"></i>รายชื่อสมาชิกผู้เช่าที่ลงทะเบียน</h3>
+                        <div id="admin-users-list" class="space-y-2.5 max-h-[380px] overflow-y-auto pr-1">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 5: RELATIONAL SQL DATABASE EXPLORER & CONSOLE -->
+            <section id="section-database" class="hidden space-y-6">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-100">
+                        <div>
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold mb-1.5">
+                                <i class="fa-solid fa-database"></i> RELATIONAL DATABASE (RDBMS • PK / FK NORMALIZED)
+                            </div>
+                            <h2 class="text-xl font-bold text-navy-900">ระบบฐานข้อมูลเชิงสัมพันธ์ (Relational / SQL)</h2>
+                            <p class="text-sm text-slate-500 mt-1">จัดเก็บข้อมูลเป็นตารางแถวและคอลัมน์ เชื่อมโยงด้วย Primary Key (PK) และ Foreign Key (FK) รองรับ MySQL, PostgreSQL และ SQL Server</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <select id="sql-dialect-select" onchange="updateSqlSchemaDisplay()" class="px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-bold bg-navy-50 text-navy-900 focus:outline-none focus:ring-2 focus:ring-brandOrange-500">
+                                <option value="mysql">Dialect: MySQL 8.0 / MariaDB</option>
+                                <option value="postgres">Dialect: PostgreSQL 16</option>
+                                <option value="mssql">Dialect: Microsoft SQL Server (T-SQL)</option>
+                            </select>
+                            <button onclick="exportFullSqlDump()" class="px-4 py-2.5 rounded-xl bg-navy-900 hover:bg-brandOrange-500 text-white font-bold text-xs shadow transition flex items-center gap-2">
+                                <i class="fa-solid fa-download"></i>
+                                <span>ส่งออกไฟล์ .SQL (Schema + Data)</span>
+                            </button>
+                            <button onclick="resetRelationalDatabase()" class="px-3.5 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-rotate"></i>
+                                <span>รีเซ็ตฐานข้อมูลเริ่มต้น</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ER Relationship Diagram Cards -->
+                    <div class="mt-6">
+                        <h3 class="text-sm font-bold text-navy-900 mb-3"><i class="fa-solid fa-diagram-project text-brandOrange-500 mr-2"></i>ความสัมพันธ์ระหว่างตาราง (Entity-Relationship Schema)</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <!-- Table 1: zones -->
+                            <div class="rounded-2xl border-2 border-navy-200 bg-navy-50/50 overflow-hidden">
+                                <div class="bg-navy-900 text-white px-4 py-2.5 flex items-center justify-between">
+                                    <span class="font-bold text-xs"><i class="fa-solid fa-table mr-1.5 text-brandOrange-400"></i>zones</span>
+                                    <span id="count-tbl-zones" class="text-[11px] bg-white/15 px-2 py-0.5 rounded-full">4 rows</span>
+                                </div>
+                                <ul class="p-3.5 space-y-1.5 text-xs font-mono">
+                                    <li class="flex justify-between"><span class="font-bold text-amber-700"><i class="fa-solid fa-key mr-1"></i>zone_code</span><span class="text-slate-500">VARCHAR(5) PK</span></li>
+                                    <li class="flex justify-between"><span>zone_name</span><span class="text-slate-500">VARCHAR(100)</span></li>
+                                    <li class="flex justify-between"><span>base_rent</span><span class="text-slate-500">DECIMAL(10,2)</span></li>
+                                </ul>
+                            </div>
+
+                            <!-- Table 2: users -->
+                            <div class="rounded-2xl border-2 border-navy-200 bg-navy-50/50 overflow-hidden">
+                                <div class="bg-navy-900 text-white px-4 py-2.5 flex items-center justify-between">
+                                    <span class="font-bold text-xs"><i class="fa-solid fa-table mr-1.5 text-brandOrange-400"></i>users</span>
+                                    <span id="count-tbl-users" class="text-[11px] bg-white/15 px-2 py-0.5 rounded-full">0 rows</span>
+                                </div>
+                                <ul class="p-3.5 space-y-1.5 text-xs font-mono">
+                                    <li class="flex justify-between"><span class="font-bold text-amber-700"><i class="fa-solid fa-key mr-1"></i>user_id</span><span class="text-slate-500">VARCHAR(36) PK</span></li>
+                                    <li class="flex justify-between"><span>full_name</span><span class="text-slate-500">VARCHAR(120)</span></li>
+                                    <li class="flex justify-between"><span>email / phone</span><span class="text-slate-500">UNIQUE</span></li>
+                                    <li class="flex justify-between"><span>shop_name</span><span class="text-slate-500">VARCHAR(150)</span></li>
+                                </ul>
+                            </div>
+
+                            <!-- Table 3: stalls -->
+                            <div class="rounded-2xl border-2 border-brandOrange-300 bg-brandOrange-50/40 overflow-hidden">
+                                <div class="bg-brandOrange-600 text-white px-4 py-2.5 flex items-center justify-between">
+                                    <span class="font-bold text-xs"><i class="fa-solid fa-table mr-1.5"></i>stalls</span>
+                                    <span id="count-tbl-stalls" class="text-[11px] bg-white/20 px-2 py-0.5 rounded-full">200 rows</span>
+                                </div>
+                                <ul class="p-3.5 space-y-1.5 text-xs font-mono">
+                                    <li class="flex justify-between"><span class="font-bold text-amber-700"><i class="fa-solid fa-key mr-1"></i>stall_id</span><span class="text-slate-500">VARCHAR(10) PK</span></li>
+                                    <li class="flex justify-between"><span class="font-bold text-blue-700"><i class="fa-solid fa-link mr-1"></i>zone_code</span><span class="text-slate-500">FK → zones</span></li>
+                                    <li class="flex justify-between"><span class="font-bold text-blue-700"><i class="fa-solid fa-link mr-1"></i>owner_id</span><span class="text-slate-500">FK → users</span></li>
+                                    <li class="flex justify-between"><span>status</span><span class="text-slate-500">ENUM/VARCHAR</span></li>
+                                </ul>
+                            </div>
+
+                            <!-- Table 4: bills -->
+                            <div class="rounded-2xl border-2 border-emerald-300 bg-emerald-50/40 overflow-hidden">
+                                <div class="bg-emerald-700 text-white px-4 py-2.5 flex items-center justify-between">
+                                    <span class="font-bold text-xs"><i class="fa-solid fa-table mr-1.5"></i>bills</span>
+                                    <span id="count-tbl-bills" class="text-[11px] bg-white/20 px-2 py-0.5 rounded-full">0 rows</span>
+                                </div>
+                                <ul class="p-3.5 space-y-1.5 text-xs font-mono">
+                                    <li class="flex justify-between"><span class="font-bold text-amber-700"><i class="fa-solid fa-key mr-1"></i>bill_id</span><span class="text-slate-500">VARCHAR(20) PK</span></li>
+                                    <li class="flex justify-between"><span class="font-bold text-blue-700"><i class="fa-solid fa-link mr-1"></i>stall_id</span><span class="text-slate-500">FK → stalls</span></li>
+                                    <li class="flex justify-between"><span class="font-bold text-blue-700"><i class="fa-solid fa-link mr-1"></i>user_id</span><span class="text-slate-500">FK → users</span></li>
+                                    <li class="flex justify-between"><span>rent / water / elec</span><span class="text-slate-500">DECIMAL</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive SQL Query Console & Live Table Inspector -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6 pt-6 border-t border-slate-100">
+                        <!-- Left: SQL Query Editor -->
+                        <div class="lg:col-span-6 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <label class="text-xs font-bold text-navy-900"><i class="fa-solid fa-terminal text-brandOrange-500 mr-1.5"></i>ชุดคำสั่ง SQL Query (รันบนฐานข้อมูลจริงในเบราว์เซอร์)</label>
+                                <div class="flex flex-wrap gap-1.5">
+                                    <button type="button" onclick="loadSampleQuery('join_stalls')" class="px-2.5 py-1 rounded-lg bg-navy-100 hover:bg-navy-200 text-navy-900 text-[11px] font-semibold">JOIN ล็อก+ผู้เช่า</button>
+                                    <button type="button" onclick="loadSampleQuery('join_bills')" class="px-2.5 py-1 rounded-lg bg-brandOrange-100 hover:bg-brandOrange-200 text-brandOrange-800 text-[11px] font-semibold">JOIN บิลค้างชำระ</button>
+                                    <button type="button" onclick="loadSampleQuery('group_zones')" class="px-2.5 py-1 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-[11px] font-semibold">GROUP BY โซน</button>
+                                </div>
+                            </div>
+                            <textarea id="sql-query-input" rows="6" class="w-full p-3.5 rounded-2xl bg-navy-950 text-emerald-300 font-mono text-xs leading-relaxed border border-navy-700 focus:outline-none focus:ring-2 focus:ring-brandOrange-500">SELECT s.stall_id, z.zone_name, s.status, u.full_name AS tenant_name, u.shop_name, z.base_rent
+FROM stalls s
+INNER JOIN zones z ON s.zone_code = z.zone_code
+LEFT JOIN users u ON s.owner_id = u.user_id
+WHERE s.status = 'occupied'
+ORDER BY s.stall_id ASC;</textarea>
+                            <div class="flex items-center justify-between gap-2">
+                                <span id="sql-exec-status" class="text-xs text-slate-500">พร้อมประมวลผลคำสั่ง SELECT / INSERT / UPDATE / DELETE</span>
+                                <button type="button" onclick="executeCustomSql()" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow transition flex items-center gap-2">
+                                    <i class="fa-solid fa-play"></i>
+                                    <span>รันคำสั่ง SQL (Execute)</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Right: DDL Schema Preview -->
+                        <div class="lg:col-span-6 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-navy-900"><i class="fa-solid fa-code text-navy-700 mr-1.5"></i>โครงสร้างสคีมา DDL (<span id="ddl-dialect-label">MySQL 8.0</span>)</span>
+                                <button type="button" onclick="copySqlDdl()" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-semibold">
+                                    <i class="fa-regular fa-copy mr-1"></i>คัดลอก DDL
+                                </button>
+                            </div>
+                            <pre id="sql-ddl-preview" class="w-full h-[188px] overflow-auto p-3.5 rounded-2xl bg-slate-900 text-amber-200 font-mono text-[11px] leading-relaxed border border-slate-700"></pre>
+                        </div>
+                    </div>
+
+                    <!-- SQL Query Result Table -->
+                    <div class="mt-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="text-xs font-bold text-navy-900"><i class="fa-solid fa-table-list text-emerald-600 mr-1.5"></i>ผลลัพธ์จากตารางฐานข้อมูล (Query Result Rows)</h4>
+                            <span id="sql-result-count" class="text-xs font-semibold text-slate-500">0 แถว</span>
+                        </div>
+                        <div id="sql-result-container" class="overflow-x-auto max-h-[340px] rounded-xl border border-slate-200 bg-white">
+                            <!-- Populated dynamically via SQL query execution -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Mobile Bottom Navigation Dock -->
+        <nav class="lg:hidden fixed bottom-0 inset-x-0 bg-white border-t border-slate-200 shadow-2xl z-30 safe-bottom-nav">
+            <div class="grid grid-cols-4 gap-1 px-2 pt-1.5">
+                <button onclick="navigateTo('booking')" id="mob-nav-booking" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-brandOrange-600 font-bold text-[11px]">
+                    <i class="fa-solid fa-table-cells text-base mb-0.5"></i>
+                    <span>จองล็อก</span>
+                </button>
+                <button onclick="navigateTo('payments')" id="mob-nav-payments" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-500 font-medium text-[11px]">
+                    <i class="fa-solid fa-file-invoice-dollar text-base mb-0.5"></i>
+                    <span>จ่ายบิล</span>
+                </button>
+                <button onclick="navigateTo('map')" id="mob-nav-map" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-500 font-medium text-[11px]">
+                    <i class="fa-solid fa-map-location-dot text-base mb-0.5"></i>
+                    <span>แผนที่</span>
+                </button>
+                <button onclick="navigateTo('database')" id="mob-nav-database" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-500 font-medium text-[11px]">
+                    <i class="fa-solid fa-database text-base mb-0.5"></i>
+                    <span>ฐานข้อมูล SQL</span>
+                </button>
+            </div>
+        </nav>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL 1: STALL BOOKING / DETAILS MODAL     -->
+    <!-- ========================================== -->
+    <div id="stall-modal" class="fixed inset-0 bg-navy-950/70 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-slate-200">
+            <div class="bg-navy-900 text-white px-6 py-4 flex items-center justify-between border-b-2 border-brandOrange-500">
+                <div class="flex items-center gap-2.5">
+                    <span id="modal-stall-badge" class="px-3 py-1 rounded-lg bg-brandOrange-500 text-white font-bold text-sm">A01</span>
+                    <h3 id="modal-stall-title" class="font-bold text-base">รายละเอียดล็อกขายสินค้า</h3>
+                </div>
+                <button onclick="closeStallModal()" class="text-slate-300 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <div id="modal-stall-body" class="p-6 space-y-4">
+                <!-- Dynamic Content -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL 2: QR PROMPTPAY PAYMENT MODAL        -->
+    <!-- ========================================== -->
+    <div id="payment-modal" class="fixed inset-0 bg-navy-950/70 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-slate-200">
+            <div class="bg-navy-900 text-white px-6 py-4 flex items-center justify-between border-b-2 border-brandOrange-500">
+                <h3 class="font-bold text-base"><i class="fa-solid fa-qrcode text-brandOrange-400 mr-2"></i>ชำระเงินผ่าน Thai QR PromptPay</h3>
+                <button onclick="closePaymentModal()" class="text-slate-300 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <div class="p-6 text-center space-y-4">
+                <div class="bg-navy-50 rounded-2xl p-4 border border-navy-100">
+                    <p id="pay-modal-bill-info" class="text-xs font-semibold text-navy-700">บิลเลขที่ #INV-001 • ล็อก A01</p>
+                    <p id="pay-modal-amount" class="text-3xl font-bold text-brandOrange-600 mt-1">฿3,500.00</p>
+                    <p class="text-[11px] text-slate-500 mt-1">ชื่อบัญชี: ตลาดตั้งเซียอวด นครปฐม</p>
+                </div>
+
+                <!-- Generated SVG QR Code Graphic -->
+                <div class="mx-auto w-44 h-44 bg-white p-3 rounded-2xl border-2 border-navy-800 shadow-inner flex flex-col items-center justify-center">
+                    <svg viewBox="0 0 100 100" class="w-32 h-32 text-navy-950 fill-current">
+                        <rect x="5" y="5" width="25" height="25" fill="none" stroke="currentColor" stroke-width="5"/>
+                        <rect x="12" y="12" width="11" height="11"/>
+                        <rect x="70" y="5" width="25" height="25" fill="none" stroke="currentColor" stroke-width="5"/>
+                        <rect x="77" y="12" width="11" height="11"/>
+                        <rect x="5" y="70" width="25" height="25" fill="none" stroke="currentColor" stroke-width="5"/>
+                        <rect x="12" y="77" width="11" height="11"/>
+                        <rect x="40" y="10" width="8" height="8"/><rect x="52" y="18" width="8" height="8"/>
+                        <rect x="38" y="35" width="12" height="12"/><rect x="55" y="40" width="10" height="10"/>
+                        <rect x="10" y="42" width="12" height="8"/><rect x="26" y="48" width="8" height="12"/>
+                        <rect x="72" y="42" width="8" height="15"/><rect x="85" y="48" width="10" height="10"/>
+                        <rect x="40" y="65" width="10" height="10"/><rect x="58" y="72" width="14" height="8"/>
+                        <rect x="42" y="84" width="15" height="10"/><rect x="75" y="75" width="18" height="18"/>
+                    </svg>
+                    <span class="text-[10px] font-bold text-navy-800 tracking-wider mt-1">PROMPTPAY QR</span>
+                </div>
+
+                <!-- Slip Image Attachment Box -->
+                <div class="text-left bg-brandOrange-50/70 border border-brandOrange-200 rounded-2xl p-3.5 space-y-2">
+                    <label for="slip-file-input" class="block text-xs font-bold text-navy-900">
+                        <i class="fa-solid fa-paperclip text-brandOrange-600 mr-1"></i>แนบไฟล์รูปสลิปการโอนเงิน (เพื่อออกใบเสร็จเก็บในบัญชี)
+                    </label>
+                    <input type="file" id="slip-file-input" accept="image/*" onchange="handleSlipFileChange(event)" class="block w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-navy-900 file:text-white hover:file:bg-brandOrange-500 cursor-pointer">
+                    <div id="slip-preview-box" class="hidden mt-2 p-2 rounded-xl bg-white border border-slate-200 flex items-center gap-3">
+                        <img id="slip-preview-img" src="https://placehold.co/120x160/f1f5f9/0B2545?text=SLIP" alt="ตัวอย่างสลิป" class="w-14 h-20 object-cover rounded-lg border border-slate-300 shrink-0">
+                        <div class="min-w-0 flex-1">
+                            <p id="slip-file-name" class="text-xs font-bold text-navy-900 truncate"></p>
+                            <p class="text-[11px] text-emerald-600 font-medium"><i class="fa-solid fa-check-circle mr-1"></i>พร้อมแนบลงใบเสร็จ</p>
+                        </div>
+                        <button type="button" onclick="clearSlipAttachment()" class="text-rose-600 hover:text-rose-800 p-1.5 text-xs" title="ลบรูปสลิป">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex gap-2.5 pt-1">
+                    <button type="button" onclick="closePaymentModal()" class="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm transition">
+                        ยกเลิก
+                    </button>
+                    <button type="button" id="confirm-pay-btn" onclick="confirmBillPayment()" class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow transition">
+                        <i class="fa-solid fa-circle-check mr-1"></i> ยืนยันส่งสลิป & รับใบเสร็จ
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL 4: CUSTOMER RECEIPT VIEWER MODAL     -->
+    <!-- ========================================== -->
+    <div id="receipt-modal" class="fixed inset-0 bg-navy-950/75 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-slate-200">
+            <div class="bg-navy-900 text-white px-6 py-4 flex items-center justify-between border-b-2 border-emerald-500">
+                <h3 class="font-bold text-base"><i class="fa-solid fa-receipt text-emerald-400 mr-2"></i>ใบเสร็จรับเงินอิเล็กทรอนิกส์</h3>
+                <button onclick="closeReceiptModal()" class="text-slate-300 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div id="receipt-modal-body" class="p-6 space-y-4 text-xs">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL 3: ADMIN CREATE BILL MODAL           -->
+    <!-- ========================================== -->
+    <div id="create-bill-modal" class="fixed inset-0 bg-navy-950/70 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-slate-200">
+            <div class="bg-navy-900 text-white px-6 py-4 flex items-center justify-between border-b-2 border-brandOrange-500">
+                <h3 class="font-bold text-base"><i class="fa-solid fa-file-circle-plus text-brandOrange-400 mr-2"></i>ออกบิลค่าเช่า & ค่าน้ำ-ค่าไฟ</h3>
+                <button onclick="closeCreateBillModal()" class="text-slate-300 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <form onsubmit="handleCreateBill(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-navy-900 mb-1">เลือกล็อกที่มีผู้เช่า</label>
+                    <select id="bill-stall-select" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brandOrange-500"></select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-navy-900 mb-1">รอบเดือน</label>
+                    <input type="text" id="bill-month" required value="พฤศจิกายน 2569" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-navy-900 mb-1">จำนวนหน่วยน้ำ (18 บ./หน่วย)</label>
+                        <input type="number" id="bill-water-units" min="0" value="12" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-navy-900 mb-1">จำนวนหน่วยไฟ (7 บ./หน่วย)</label>
+                        <input type="number" id="bill-elec-units" min="0" value="85" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm">
+                    </div>
+                </div>
+                <div class="flex gap-2.5 pt-2">
+                    <button type="button" onclick="closeCreateBillModal()" class="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm">ยกเลิก</button>
+                    <button type="submit" class="flex-1 py-2.5 rounded-xl bg-brandOrange-500 hover:bg-brandOrange-600 text-white font-bold text-sm shadow">บันทึกและส่งบิล</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- JAVASCRIPT APPLICATION LOGIC               -->
+    <!-- ========================================== -->
+    <script>
+        // Storage Keys (Stores serialized SQLite binary database + always-on Customer Backup Vault)
+        const SQL_DB_STORAGE_KEY = 'tang_sia_huad_relational_sqlite_v1';
+        const CUSTOMER_BACKUP_STORAGE_KEY = 'tang_sia_huad_customer_backup_v1';
+
+        // Relational SQL Engine Instance (SQL.js)
+        let sqlDb = null;
+
+        // Default Initial Users (Table: users)
+        const DEFAULT_USERS = [
+            {
+                id: 'u-demo',
+                firstName: 'สมชาย',
+                lastName: 'ขายดี',
+                email: 'somchai@market.com',
+                phone: '081-234-5678',
+                password: '1234',
+                shopName: 'ร้านสมชาย หมูสดคุณภาพ',
+                details: 'โซนอาหารสดและเนื้อหมู'
+            },
+            {
+                id: 'u-2',
+                firstName: 'มาลี',
+                lastName: 'ศรีสุข',
+                email: 'malee@market.com',
+                phone: '089-876-5432',
+                password: '1234',
+                shopName: 'ครัวแม่มาลี ข้าวแกงปักษ์ใต้',
+                details: 'อาหารปรุงสำเร็จ'
+            },
+            {
+                id: 'u-3',
+                firstName: 'ธนพล',
+                lastName: 'การค้า',
+                email: 'thanapon@market.com',
+                phone: '086-555-4433',
+                password: '1234',
+                shopName: 'ธนพล แฟชั่น & เสื้อผ้า',
+                details: 'เสื้อผ้าแฟชั่น'
+            }
+        ];
+
+        // Default Zones (Table: zones)
+        const DEFAULT_ZONES = [
+            { code: 'A', name: 'อาหารสด/ค้าส่งหมู', rent: 3500 },
+            { code: 'B', name: 'อาหารปรุงสำเร็จ', rent: 3000 },
+            { code: 'C', name: 'เสื้อผ้า/แฟชั่น', rent: 2500 },
+            { code: 'D', name: 'สินค้าเบ็ดเตล็ด', rent: 2200 }
+        ];
+
+        // Default Bills (Table: bills)
+        const DEFAULT_BILLS = [
+            {
+                id: 'INV-6911-01',
+                month: 'พฤศจิกายน 2569',
+                stallId: 'A01',
+                ownerId: 'u-demo',
+                rent: 3500,
+                waterUnits: 15,
+                waterCost: 270,
+                elecUnits: 120,
+                elecCost: 840,
+                status: 'unpaid'
+            },
+            {
+                id: 'INV-6910-01',
+                month: 'ตุลาคม 2569',
+                stallId: 'A01',
+                ownerId: 'u-demo',
+                rent: 3500,
+                waterUnits: 14,
+                waterCost: 252,
+                elecUnits: 110,
+                elecCost: 770,
+                status: 'paid'
+            },
+            {
+                id: 'INV-6911-02',
+                month: 'พฤศจิกายน 2569',
+                stallId: 'B05',
+                ownerId: 'u-2',
+                rent: 3000,
+                waterUnits: 20,
+                waterCost: 360,
+                elecUnits: 150,
+                elecCost: 1050,
+                status: 'unpaid'
+            }
+        ];
+
+        // Global UI & Synchronized Cache State
+        let appState = {
+            users: [],
+            stalls: [],
+            bills: [],
+            receipts: [],
+            currentUser: null,
+            selectedZone: 'ALL',
+            activeSection: 'booking',
+            activePaymentBillId: null,
+            pendingSlipDataUrl: null,
+            pendingSlipFileName: ''
+        };
+
+        // Always-on Customer Backup & Restore across open/close sessions
+        function saveCustomerBackup() {
+            try {
+                const payload = {
+                    savedAt: new Date().toISOString(),
+                    currentUser: appState.currentUser,
+                    users: appState.users,
+                    stalls: appState.stalls,
+                    bills: appState.bills,
+                    receipts: appState.receipts
+                };
+                localStorage.setItem(CUSTOMER_BACKUP_STORAGE_KEY, JSON.stringify(payload));
+            } catch (err) {
+                console.warn('Customer backup quota warning:', err);
+            }
+        }
+
+        function loadCustomerBackup() {
+            try {
+                const raw = localStorage.getItem(CUSTOMER_BACKUP_STORAGE_KEY);
+                if (!raw) return null;
+                return JSON.parse(raw);
+            } catch (err) {
+                return null;
+            }
+        }
+
+        // Helper: Execute parameterized SQL statement safely
+        function dbRun(sql, params = []) {
+            if (!sqlDb) return;
+            sqlDb.run(sql, params);
+        }
+
+        // Helper: Query rows as array of JS objects
+        function dbQuery(sql, params = []) {
+            if (!sqlDb) return [];
+            const stmt = sqlDb.prepare(sql);
+            stmt.bind(params);
+            const rows = [];
+            while (stmt.step()) {
+                rows.push(stmt.getAsObject());
+            }
+            stmt.free();
+            return rows;
+        }
+
+        // Initialize Relational SQL Database (SQL.js with Foreign Keys Enabled)
+        async function initRelationalDatabase() {
+            try {
+                const SQL = await initSqlJs({
+                    locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/${file}`
+                });
+
+                const savedBase64 = localStorage.getItem(SQL_DB_STORAGE_KEY);
+                if (savedBase64) {
+                    const binaryStr = atob(savedBase64);
+                    const bytes = new Uint8Array(binaryStr.length);
+                    for (let i = 0; i < binaryStr.length; i++) {
+                        bytes[i] = binaryStr.charCodeAt(i);
+                    }
+                    sqlDb = new SQL.Database(bytes);
+                    sqlDb.run('PRAGMA foreign_keys = ON;');
+                    // Auto-migrate older cached SQLite schemas missing approval_status
+                    try {
+                        sqlDb.exec('SELECT approval_status FROM stalls LIMIT 1');
+                    } catch (migErr) {
+                        sqlDb.run("ALTER TABLE stalls ADD COLUMN approval_status VARCHAR(30) NOT NULL DEFAULT 'none'");
+                        sqlDb.run("UPDATE stalls SET approval_status = 'สำเร็จ' WHERE status = 'occupied'");
+                        sqlDb.run("UPDATE stalls SET approval_status = 'กำลังตรวจสอบ' WHERE status = 'pending'");
+                        persistRelationalDatabase();
+                    }
+                } else {
+                    sqlDb = new SQL.Database();
+                    seedRelationalTables();
+                    persistRelationalDatabase();
+                }
+            } catch (err) {
+                console.warn('SQL.js WASM fallback mode:', err);
+                // Fallback in-memory mock if WASM is blocked by network
+                sqlDb = null;
+                seedFallbackMemory();
+            }
+
+            syncStateFromRelationalDb();
+            if (!appState.stalls || appState.stalls.length === 0) {
+                seedFallbackMemory();
+            }
+            updateSqlSchemaDisplay();
+        }
+
+        // Create Normalized Relational Tables with Primary Keys & Foreign Keys
+        function seedRelationalTables() {
+            sqlDb.run('PRAGMA foreign_keys = ON;');
+
+            sqlDb.run(`
+                CREATE TABLE zones (
+                    zone_code VARCHAR(5) PRIMARY KEY,
+                    zone_name VARCHAR(100) NOT NULL,
+                    base_rent DECIMAL(10,2) NOT NULL
+                );
+
+                CREATE TABLE users (
+                    user_id VARCHAR(36) PRIMARY KEY,
+                    first_name VARCHAR(60) NOT NULL,
+                    last_name VARCHAR(60) NOT NULL,
+                    full_name VARCHAR(120) NOT NULL,
+                    email VARCHAR(120) UNIQUE NOT NULL,
+                    phone VARCHAR(25) NOT NULL,
+                    password_hash VARCHAR(120) NOT NULL,
+                    shop_name VARCHAR(150),
+                    details TEXT,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                );
+
+                CREATE TABLE stalls (
+                    stall_id VARCHAR(10) PRIMARY KEY,
+                    zone_code VARCHAR(5) NOT NULL,
+                    status VARCHAR(20) NOT NULL DEFAULT 'available',
+                    approval_status VARCHAR(30) NOT NULL DEFAULT 'none',
+                    owner_id VARCHAR(36) NULL,
+                    booking_shop_name VARCHAR(150) NULL,
+                    booking_phone VARCHAR(25) NULL,
+                    product_type VARCHAR(150) NULL,
+                    FOREIGN KEY (zone_code) REFERENCES zones(zone_code) ON UPDATE CASCADE,
+                    FOREIGN KEY (owner_id) REFERENCES users(user_id) ON DELETE SET NULL
+                );
+
+                CREATE TABLE bills (
+                    bill_id VARCHAR(20) PRIMARY KEY,
+                    billing_month VARCHAR(50) NOT NULL,
+                    stall_id VARCHAR(10) NOT NULL,
+                    user_id VARCHAR(36) NOT NULL,
+                    rent_amount DECIMAL(10,2) NOT NULL,
+                    water_units INT NOT NULL DEFAULT 0,
+                    water_cost DECIMAL(10,2) NOT NULL DEFAULT 0,
+                    elec_units INT NOT NULL DEFAULT 0,
+                    elec_cost DECIMAL(10,2) NOT NULL DEFAULT 0,
+                    status VARCHAR(20) NOT NULL DEFAULT 'unpaid',
+                    FOREIGN KEY (stall_id) REFERENCES stalls(stall_id) ON DELETE CASCADE,
+                    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+                );
+            `);
+
+            // Insert Zones
+            DEFAULT_ZONES.forEach(z => {
+                dbRun('INSERT INTO zones (zone_code, zone_name, base_rent) VALUES (?, ?, ?)', [z.code, z.name, z.rent]);
+            });
+
+            // Insert Users
+            DEFAULT_USERS.forEach(u => {
+                dbRun(
+                    'INSERT INTO users (user_id, first_name, last_name, full_name, email, phone, password_hash, shop_name, details) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                    [u.id, u.firstName, u.lastName, `${u.firstName} ${u.lastName}`, u.email, u.phone, u.password, u.shopName, u.details]
+                );
+            });
+
+            // Insert 200 Stalls linked via Foreign Key (zone_code -> zones.zone_code, owner_id -> users.user_id)
+            // approval_status: 'none' | 'กำลังตรวจสอบ' | 'สำเร็จ' | 'ไม่สำเร็จ'
+            const presetBookings = {
+                'A01': { ownerId: 'u-demo', shopName: 'ร้านสมชาย หมูสดคุณภาพ', phone: '081-234-5678', productType: 'เนื้อหมูสด/ชิ้นส่วนหมู', status: 'occupied', approvalStatus: 'สำเร็จ' },
+                'A02': { ownerId: 'u-demo', shopName: 'ร้านสมชาย หมูสดคุณภาพ (2)', phone: '081-234-5678', productType: 'เครื่องในหมู/หมูบด', status: 'occupied', approvalStatus: 'สำเร็จ' },
+                'A03': { ownerId: 'u-demo', shopName: 'ร้านสมชาย สาขา 3', phone: '081-234-5678', productType: 'หมูสามชั้นสไลซ์', status: 'pending', approvalStatus: 'กำลังตรวจสอบ' },
+                'B05': { ownerId: 'u-2', shopName: 'ครัวแม่มาลี ข้าวแกงปักษ์ใต้', phone: '089-876-5432', productType: 'ข้าวแกงและอาหารตามสั่ง', status: 'occupied', approvalStatus: 'สำเร็จ' },
+                'C12': { ownerId: 'u-3', shopName: 'ธนพล แฟชั่น & เสื้อผ้า', phone: '086-555-4433', productType: 'เสื้อผ้าสำเร็จรูป', status: 'occupied', approvalStatus: 'สำเร็จ' }
+            };
+
+            DEFAULT_ZONES.forEach(z => {
+                for (let i = 1; i <= 50; i++) {
+                    const stallId = `${z.code}${String(i).padStart(2, '0')}`;
+                    const p = presetBookings[stallId];
+                    dbRun(
+                        'INSERT INTO stalls (stall_id, zone_code, status, approval_status, owner_id, booking_shop_name, booking_phone, product_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                        [
+                            stallId,
+                            z.code,
+                            p ? p.status : 'available',
+                            p ? p.approvalStatus : 'none',
+                            p ? p.ownerId : null,
+                            p ? p.shopName : null,
+                            p ? p.phone : null,
+                            p ? p.productType : null
+                        ]
+                    );
+                }
+            });
+
+            // Insert Initial Bills linked via Foreign Keys (stall_id -> stalls.stall_id, user_id -> users.user_id)
+            DEFAULT_BILLS.forEach(b => {
+                dbRun(
+                    'INSERT INTO bills (bill_id, billing_month, stall_id, user_id, rent_amount, water_units, water_cost, elec_units, elec_cost, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                    [b.id, b.month, b.stallId, b.ownerId, b.rent, b.waterUnits, b.waterCost, b.elecUnits, b.elecCost, b.status]
+                );
+            });
+        }
+
+        function seedFallbackMemory() {
+            appState.users = JSON.parse(JSON.stringify(DEFAULT_USERS));
+            const presetBookings = {
+                'A01': { ownerId: 'u-demo', ownerName: 'สมชาย ขายดี', shopName: 'ร้านสมชาย หมูสดคุณภาพ', phone: '081-234-5678', productType: 'เนื้อหมูสด/ชิ้นส่วนหมู', status: 'occupied', approvalStatus: 'สำเร็จ' },
+                'A02': { ownerId: 'u-demo', ownerName: 'สมชาย ขายดี', shopName: 'ร้านสมชาย หมูสดคุณภาพ (2)', phone: '081-234-5678', productType: 'เครื่องในหมู/หมูบด', status: 'occupied', approvalStatus: 'สำเร็จ' },
+                'A03': { ownerId: 'u-demo', ownerName: 'สมชาย ขายดี', shopName: 'ร้านสมชาย สาขา 3', phone: '081-234-5678', productType: 'หมูสามชั้นสไลซ์', status: 'pending', approvalStatus: 'กำลังตรวจสอบ' },
+                'B05': { ownerId: 'u-2', ownerName: 'มาลี ศรีสุข', shopName: 'ครัวแม่มาลี ข้าวแกงปักษ์ใต้', phone: '089-876-5432', productType: 'ข้าวแกงและอาหารตามสั่ง', status: 'occupied', approvalStatus: 'สำเร็จ' },
+                'C12': { ownerId: 'u-3', ownerName: 'ธนพล การค้า', shopName: 'ธนพล แฟชั่น & เสื้อผ้า', phone: '086-555-4433', productType: 'เสื้อผ้าสำเร็จรูป', status: 'occupied', approvalStatus: 'สำเร็จ' }
+            };
+            appState.stalls = [];
+            DEFAULT_ZONES.forEach(z => {
+                for (let i = 1; i <= 50; i++) {
+                    const id = `${z.code}${String(i).padStart(2, '0')}`;
+                    const p = presetBookings[id];
+                    appState.stalls.push({
+                        id, zone: z.code, zoneName: z.name, rent: z.rent,
+                        status: p ? p.status : 'available',
+                        approvalStatus: p ? p.approvalStatus : 'none',
+                        ownerId: p ? p.ownerId : null,
+                        ownerName: p ? p.ownerName : null,
+                        shopName: p ? p.shopName : null,
+                        phone: p ? p.phone : null,
+                        productType: p ? p.productType : null
+                    });
+                }
+            });
+            appState.bills = DEFAULT_BILLS.map(b => {
+                const u = appState.users.find(x => x.id === b.ownerId);
+                return { ...b, ownerName: u ? `${u.firstName} ${u.lastName}` : 'ผู้เช่า' };
+            });
+        }
+
+        // Persist SQLite binary database to localStorage
+        function persistRelationalDatabase() {
+            if (!sqlDb) return;
+            try {
+                const binaryArray = sqlDb.export();
+                let binaryStr = '';
+                for (let i = 0; i < binaryArray.length; i++) {
+                    binaryStr += String.fromCharCode(binaryArray[i]);
+                }
+                localStorage.setItem(SQL_DB_STORAGE_KEY, btoa(binaryStr));
+            } catch (e) {
+                // Ignore storage quota issues
+            }
+        }
+
+        // Pull Relational JOIN queries into UI state
+        function syncStateFromRelationalDb() {
+            if (!sqlDb) return;
+
+            try {
+                // 1. Query users table
+                const userRows = dbQuery('SELECT * FROM users ORDER BY created_at ASC');
+                appState.users = userRows.map(r => ({
+                    id: r.user_id,
+                    firstName: r.first_name,
+                    lastName: r.last_name,
+                    email: r.email,
+                    phone: r.phone,
+                    password: r.password_hash,
+                    shopName: r.shop_name,
+                    details: r.details
+                }));
+
+                // 2. Query stalls JOIN zones LEFT JOIN users
+                const stallRows = dbQuery(`
+                    SELECT s.stall_id, s.zone_code, z.zone_name, z.base_rent,
+                           s.status, s.approval_status, s.owner_id, u.full_name AS owner_name,
+                           s.booking_shop_name, s.booking_phone, s.product_type
+                    FROM stalls s
+                    INNER JOIN zones z ON s.zone_code = z.zone_code
+                    LEFT JOIN users u ON s.owner_id = u.user_id
+                    ORDER BY s.stall_id ASC
+                `);
+                appState.stalls = stallRows.map(r => ({
+                    id: r.stall_id,
+                    zone: r.zone_code,
+                    zoneName: r.zone_name,
+                    rent: Number(r.base_rent),
+                    status: r.status,
+                    approvalStatus: r.approval_status || (r.status === 'occupied' ? 'สำเร็จ' : (r.status === 'pending' ? 'กำลังตรวจสอบ' : 'none')),
+                    ownerId: r.owner_id,
+                    ownerName: r.owner_name,
+                    shopName: r.booking_shop_name,
+                    phone: r.booking_phone,
+                    productType: r.product_type
+                }));
+
+                // 3. Query bills JOIN users
+                const billRows = dbQuery(`
+                    SELECT b.*, u.full_name AS owner_name
+                    FROM bills b
+                    INNER JOIN users u ON b.user_id = u.user_id
+                    ORDER BY b.rowid DESC
+                `);
+                appState.bills = billRows.map(r => ({
+                    id: r.bill_id,
+                    month: r.billing_month,
+                    stallId: r.stall_id,
+                    ownerId: r.user_id,
+                    ownerName: r.owner_name,
+                    rent: Number(r.rent_amount),
+                    waterUnits: Number(r.water_units),
+                    waterCost: Number(r.water_cost),
+                    elecUnits: Number(r.elec_units),
+                    elecCost: Number(r.elec_cost),
+                    status: r.status
+                }));
+            } catch (syncErr) {
+                console.warn('Rebuilding relational tables after schema mismatch:', syncErr);
+                sqlDb.run('DROP TABLE IF EXISTS bills; DROP TABLE IF EXISTS stalls; DROP TABLE IF EXISTS users; DROP TABLE IF EXISTS zones;');
+                seedRelationalTables();
+                persistRelationalDatabase();
+                return syncStateFromRelationalDb();
+            }
+
+            // Merge persistent Customer Backup (receipts, slips, users, bills, stalls)
+            const backup = loadCustomerBackup();
+            if (backup) {
+                if (Array.isArray(backup.receipts)) {
+                    appState.receipts = backup.receipts;
+                }
+                if (Array.isArray(backup.users)) {
+                    backup.users.forEach(bu => {
+                        if (!appState.users.some(u => u.id === bu.id)) {
+                            appState.users.push(bu);
+                        }
+                    });
+                }
+                if (Array.isArray(backup.bills)) {
+                    backup.bills.forEach(bb => {
+                        const existing = appState.bills.find(b => b.id === bb.id);
+                        if (!existing) {
+                            appState.bills.unshift(bb);
+                        } else if (bb.status === 'paid') {
+                            existing.status = 'paid';
+                        }
+                    });
+                }
+                if (Array.isArray(backup.stalls)) {
+                    backup.stalls.forEach(bs => {
+                        const target = appState.stalls.find(s => s.id === bs.id);
+                        if (target && (bs.status === 'occupied' || bs.status === 'pending')) {
+                            target.status = bs.status;
+                            target.approvalStatus = bs.approvalStatus || (bs.status === 'pending' ? 'กำลังตรวจสอบ' : 'สำเร็จ');
+                            target.ownerId = bs.ownerId;
+                            target.ownerName = bs.ownerName;
+                            target.shopName = bs.shopName;
+                            target.phone = bs.phone;
+                            target.productType = bs.productType;
+                        }
+                    });
+                }
+            }
+
+            saveCustomerBackup();
+
+            // Update Table Row Counters in Database Section
+            const uCount = document.getElementById('count-tbl-users');
+            const sCount = document.getElementById('count-tbl-stalls');
+            const bCount = document.getElementById('count-tbl-bills');
+            if (uCount) uCount.textContent = `${appState.users.length} rows`;
+            if (sCount) sCount.textContent = `${appState.stalls.length} rows`;
+            if (bCount) bCount.textContent = `${appState.bills.length} rows`;
+        }
+
+        // Toast Helper
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const colors = {
+                success: 'bg-navy-900 border-emerald-500 text-white',
+                error: 'bg-rose-900 border-rose-500 text-white',
+                info: 'bg-navy-800 border-brandOrange-500 text-white'
+            };
+            const icons = {
+                success: '<i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>',
+                error: '<i class="fa-solid fa-circle-exclamation text-rose-400 text-lg"></i>',
+                info: '<i class="fa-solid fa-bell text-brandOrange-400 text-lg"></i>'
+            };
+
+            toast.className = `pointer-events-auto flex items-center gap-3 px-4 py-3.5 rounded-2xl shadow-xl border-l-4 ${colors[type] || colors.info} text-xs sm:text-sm font-medium transition-all duration-300 transform translate-y-2 opacity-0`;
+            toast.innerHTML = `${icons[type] || icons.info}<span>${message}</span>`;
+            container.appendChild(toast);
+
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            });
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3400);
+        }
+
+        // ==========================================
+        // AUTHENTICATION & LANDING SCREEN LOGIC
+        // ==========================================
+        function selectLandingTab(role) {
+            document.getElementById('landing-role-input').value = role;
+            const tabCust = document.getElementById('landing-tab-customer');
+            const tabAdmin = document.getElementById('landing-tab-admin');
+            const subTabs = document.getElementById('customer-auth-mode-tabs');
+            const adminQuick = document.getElementById('admin-quick-box');
+            const custQuick = document.getElementById('customer-quick-box');
+            const userLabel = document.getElementById('landing-user-label');
+            const userInput = document.getElementById('landing-username');
+            const roleHint = document.getElementById('landing-role-hint');
+
+            if (role === 'customer') {
+                tabCust.className = 'py-3 px-3 rounded-xl text-xs sm:text-sm font-bold bg-navy-800 text-white shadow-md transition flex items-center justify-center gap-2';
+                tabAdmin.className = 'py-3 px-3 rounded-xl text-xs sm:text-sm font-bold text-navy-800 hover:bg-white/70 transition flex items-center justify-center gap-2';
+                subTabs.classList.remove('hidden');
+                adminQuick.classList.add('hidden');
+                custQuick.classList.remove('hidden');
+                switchCustomerAuthMode('login');
+                userLabel.textContent = 'อีเมล หรือ เบอร์โทรศัพท์ผู้เช่า';
+                userInput.placeholder = 'กรอกอีเมล หรือ เบอร์โทรศัพท์ที่ลงทะเบียน';
+                roleHint.innerHTML = '<i class="fa-solid fa-circle-info text-brandOrange-600 mr-1"></i> <strong>ยังไม่มีบัญชี?</strong> กดที่ปุ่ม <strong>"สร้างบัญชีลูกค้าใหม่"</strong> ด้านบนเพื่อลงทะเบียนชื่อ-นามสกุล อีเมล และเบอร์โทรของคุณได้ทันที';
+            } else {
+                tabAdmin.className = 'py-3 px-3 rounded-xl text-xs sm:text-sm font-bold bg-navy-800 text-white shadow-md transition flex items-center justify-center gap-2';
+                tabCust.className = 'py-3 px-3 rounded-xl text-xs sm:text-sm font-bold text-navy-800 hover:bg-white/70 transition flex items-center justify-center gap-2';
+                subTabs.classList.add('hidden');
+                document.getElementById('landing-register-form').classList.add('hidden');
+                document.getElementById('landing-login-form').classList.remove('hidden');
+                adminQuick.classList.remove('hidden');
+                custQuick.classList.add('hidden');
+                userLabel.textContent = 'รหัสผู้ดูแลระบบ (Admin Username)';
+                userInput.placeholder = 'กรอกชื่อผู้ใช้แอดมิน (เช่น admin)';
+                roleHint.innerHTML = '<i class="fa-solid fa-shield-halved text-brandOrange-600 mr-1"></i> <strong>โหมดผู้ดูแลระบบ:</strong> สำหรับเจ้าหน้าที่ตลาดจัดการล็อกขายสินค้าและออกบิลค่าน้ำ-ค่าไฟ (รหัสทดสอบ: admin / admin123)';
+            }
+        }
+
+        function switchCustomerAuthMode(mode) {
+            const loginForm = document.getElementById('landing-login-form');
+            const regForm = document.getElementById('landing-register-form');
+            const btnLogin = document.getElementById('subtab-cust-login');
+            const btnReg = document.getElementById('subtab-cust-register');
+
+            if (mode === 'login') {
+                loginForm.classList.remove('hidden');
+                regForm.classList.add('hidden');
+                btnLogin.className = 'py-2 px-3 rounded-xl text-xs font-bold bg-brandOrange-500 text-white shadow-xs transition';
+                btnReg.className = 'py-2 px-3 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition';
+            } else {
+                loginForm.classList.add('hidden');
+                regForm.classList.remove('hidden');
+                btnReg.className = 'py-2 px-3 rounded-xl text-xs font-bold bg-brandOrange-500 text-white shadow-xs transition';
+                btnLogin.className = 'py-2 px-3 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition';
+            }
+        }
+
+        function handleLandingLogin(e) {
+            e.preventDefault();
+            const role = document.getElementById('landing-role-input').value;
+            const username = document.getElementById('landing-username').value.trim();
+            const password = document.getElementById('landing-password').value.trim();
+
+            if (role === 'admin') {
+                if ((username.toLowerCase() === 'admin' && password === 'admin123') || (username === 'admin' && password === '1234')) {
+                    enterApp({
+                        id: 'admin-1',
+                        role: 'admin',
+                        name: 'ผู้ดูแลระบบตลาดตั้งเซียอวด',
+                        shopName: 'สำนักงานตลาดตั้งเซียอวด',
+                        phone: '034-251-XXX',
+                        email: 'admin@tangsiahuad.com'
+                    });
+                } else {
+                    showToast('ชื่อผู้ใช้หรือรหัสผ่านแอดมินไม่ถูกต้อง (ลองใช้ admin / admin123)', 'error');
+                }
+                return;
+            }
+
+            // Customer Login
+            const foundUser = appState.users.find(u =>
+                (u.email.toLowerCase() === username.toLowerCase() || u.phone.replace(/-/g, '') === username.replace(/-/g, '')) &&
+                u.password === password
+            );
+
+            if (foundUser) {
+                enterApp({
+                    id: foundUser.id,
+                    role: 'customer',
+                    name: `${foundUser.firstName} ${foundUser.lastName}`,
+                    shopName: foundUser.shopName || 'ร้านค้าทั่วไป',
+                    phone: foundUser.phone,
+                    email: foundUser.email
+                });
+            } else {
+                showToast('ไม่พบบัญชีผู้ใช้หรือรหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบหรือสมัครสมาชิกใหม่', 'error');
+            }
+        }
+
+        function handleCustomerRegister(e) {
+            e.preventDefault();
+            const firstName = document.getElementById('reg-firstname').value.trim();
+            const lastName = document.getElementById('reg-lastname').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const phone = document.getElementById('reg-phone').value.trim();
+            const password = document.getElementById('reg-password').value.trim();
+            const shopName = document.getElementById('reg-shopname').value.trim();
+            const details = document.getElementById('reg-details').value.trim();
+
+            const exists = appState.users.some(u => u.email.toLowerCase() === email.toLowerCase());
+            if (exists) {
+                showToast('อีเมลนี้ถูกใช้งานในระบบแล้ว กรุณาใช้อีเมลอื่นหรือเข้าสู่ระบบ', 'error');
+                return;
+            }
+
+            const newUserId = 'u-' + Date.now();
+            const finalShopName = shopName || `ร้าน${firstName}`;
+
+            if (sqlDb) {
+                dbRun(
+                    'INSERT INTO users (user_id, first_name, last_name, full_name, email, phone, password_hash, shop_name, details) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                    [newUserId, firstName, lastName, `${firstName} ${lastName}`, email, phone, password, finalShopName, details]
+                );
+                persistRelationalDatabase();
+                syncStateFromRelationalDb();
+            } else {
+                appState.users.push({
+                    id: newUserId, firstName, lastName, email, phone, password, shopName: finalShopName, details
+                });
+            }
+
+            enterApp({
+                id: newUserId,
+                role: 'customer',
+                name: `${firstName} ${lastName}`,
+                shopName: finalShopName,
+                phone: phone,
+                email: email
+            });
+            showToast(`บันทึกข้อมูลลงตาราง users และสมัครสมาชิกสำเร็จ!`, 'success');
+        }
+
+        function quickCustomerLogin() {
+            const demo = appState.users[0];
+            enterApp({
+                id: demo.id,
+                role: 'customer',
+                name: `${demo.firstName} ${demo.lastName}`,
+                shopName: demo.shopName,
+                phone: demo.phone,
+                email: demo.email
+            });
+        }
+
+        function quickAdminLogin() {
+            enterApp({
+                id: 'admin-1',
+                role: 'admin',
+                name: 'แอดมินสำนักงานตลาด',
+                shopName: 'สำนักงานตลาดตั้งเซียอวด',
+                phone: '034-251-XXX',
+                email: 'admin@tangsiahuad.com'
+            });
+        }
+
+        function enterApp(userObj) {
+            appState.currentUser = userObj;
+            saveCustomerBackup();
+            document.getElementById('landing-login-screen').classList.add('hidden');
+            document.getElementById('main-app-wrapper').classList.remove('hidden');
+
+            // Update Header & Drawer UI
+            document.getElementById('current-user-name').textContent = userObj.name;
+            document.getElementById('drawer-user-title').textContent = userObj.name;
+            document.getElementById('drawer-user-contact').textContent = `${userObj.shopName} • ${userObj.phone}`;
+
+            const navAdmin = document.getElementById('nav-admin');
+            if (userObj.role === 'admin') {
+                document.getElementById('drawer-user-role').textContent = 'สิทธิ์: ผู้ดูแลระบบ (Admin)';
+                navAdmin.classList.remove('hidden');
+                navigateTo('admin');
+            } else {
+                document.getElementById('drawer-user-role').textContent = 'สิทธิ์: ลูกค้า / ผู้เช่าล็อก';
+                navAdmin.classList.add('hidden');
+                navigateTo('booking');
+            }
+
+            renderStalls();
+            renderBills();
+            renderCustomerReceipts();
+            renderAdminDashboard();
+            showToast(`เข้าสู่ระบบในชื่อ ${userObj.name} (สำรองข้อมูลอัตโนมัติพร้อมใช้งาน)`, 'success');
+        }
+
+        function logoutToLanding() {
+            appState.currentUser = null;
+            saveCustomerBackup();
+            document.getElementById('main-app-wrapper').classList.add('hidden');
+            document.getElementById('landing-login-screen').classList.remove('hidden');
+            document.getElementById('landing-password').value = '';
+            showToast('ออกจากระบบเรียบร้อยแล้ว (ข้อมูลลูกค้าถูกสำรองไว้แล้ว)', 'info');
+        }
+
+        // ==========================================
+        // NAVIGATION & HAMBURGER DRAWER
+        // ==========================================
+        function toggleMenu() {
+            const drawer = document.getElementById('mobile-drawer');
+            const backdrop = document.getElementById('drawer-backdrop');
+            const isClosed = drawer.classList.contains('-translate-x-full');
+
+            if (isClosed) {
+                drawer.classList.remove('-translate-x-full');
+                backdrop.classList.remove('hidden');
+            } else {
+                drawer.classList.add('-translate-x-full');
+                backdrop.classList.add('hidden');
+            }
+        }
+
+        function navigateTo(sectionId) {
+            appState.activeSection = sectionId;
+            const sections = ['booking', 'payments', 'map', 'admin', 'database'];
+            sections.forEach(sec => {
+                const el = document.getElementById(`section-${sec}`);
+                if (el) {
+                    if (sec === sectionId) el.classList.remove('hidden');
+                    else el.classList.add('hidden');
+                }
+            });
+
+            // Update Drawer Active States
+            ['booking', 'payments', 'map', 'database'].forEach(nav => {
+                const btn = document.getElementById(`nav-${nav}`);
+                if (btn) {
+                    if (nav === sectionId) {
+                        btn.className = 'nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-semibold text-sm bg-navy-800 text-white shadow-xs';
+                    } else if (nav === 'database') {
+                        btn.className = 'nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-medium text-sm text-emerald-800 bg-emerald-50/70 hover:bg-emerald-100 border border-emerald-200';
+                    } else {
+                        btn.className = 'nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-medium text-sm text-slate-700 hover:bg-navy-50';
+                    }
+                }
+            });
+
+            // Update Mobile Bottom Nav
+            ['booking', 'payments', 'map', 'database'].forEach(mob => {
+                const mBtn = document.getElementById(`mob-nav-${mob}`);
+                if (mBtn) {
+                    if (mob === sectionId) {
+                        mBtn.className = 'flex flex-col items-center justify-center py-1.5 rounded-xl text-brandOrange-600 font-bold text-[11px]';
+                    } else {
+                        mBtn.className = 'flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-500 font-medium text-[11px]';
+                    }
+                }
+            });
+
+            if (sectionId === 'payments') {
+                renderBills();
+                renderCustomerReceipts();
+            }
+            if (sectionId === 'admin') renderAdminDashboard();
+            if (sectionId === 'database') {
+                syncStateFromRelationalDb();
+                executeCustomSql();
+            }
+        }
+
+        // ==========================================
+        // 200 STALLS GRID & BOOKING LOGIC
+        // ==========================================
+        function filterZone(zone) {
+            appState.selectedZone = zone;
+            ['ALL', 'A', 'B', 'C', 'D'].forEach(z => {
+                const btn = document.getElementById(`zone-btn-${z}`);
+                if (btn) {
+                    if (z === zone) {
+                        btn.className = 'zone-filter-btn px-3.5 py-2.5 rounded-xl text-xs font-bold bg-navy-800 text-white shadow-xs min-h-[40px]';
+                    } else {
+                        btn.className = 'zone-filter-btn px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 min-h-[40px]';
+                    }
+                }
+            });
+            renderStalls();
+        }
+
+        function renderStalls() {
+            const grid = document.getElementById('stalls-grid');
+            const statusFilter = document.getElementById('status-filter').value;
+            const searchQuery = document.getElementById('search-stall').value.trim().toLowerCase();
+
+            // Update Top Stats (ล็อกว่าง vs กำลังตรวจสอบ/สำเร็จ)
+            const totalAvailable = appState.stalls.filter(s => s.status === 'available').length;
+            const totalOccupied = appState.stalls.length - totalAvailable;
+            document.getElementById('stat-available').textContent = totalAvailable;
+            document.getElementById('stat-occupied').textContent = totalOccupied;
+
+            const filtered = appState.stalls.filter(stall => {
+                const matchZone = appState.selectedZone === 'ALL' || stall.zone === appState.selectedZone;
+                const matchStatus = statusFilter === 'ALL' ||
+                    (statusFilter === 'available' && stall.status === 'available') ||
+                    (statusFilter === 'occupied' && stall.status !== 'available');
+                const matchSearch = !searchQuery ||
+                    stall.id.toLowerCase().includes(searchQuery) ||
+                    (stall.shopName && stall.shopName.toLowerCase().includes(searchQuery)) ||
+                    (stall.ownerName && stall.ownerName.toLowerCase().includes(searchQuery)) ||
+                    (stall.approvalStatus && stall.approvalStatus.toLowerCase().includes(searchQuery));
+                return matchZone && matchStatus && matchSearch;
+            });
+
+            grid.innerHTML = filtered.map(stall => {
+                const isMine = appState.currentUser && stall.ownerId === appState.currentUser.id;
+                const isPending = stall.status === 'pending' || stall.approvalStatus === 'กำลังตรวจสอบ';
+                let cardClasses = '';
+                let badgeText = '';
+
+                if (stall.status === 'available') {
+                    cardClasses = 'bg-emerald-50 hover:bg-emerald-100 border-emerald-300 text-emerald-950';
+                    badgeText = '<span class="text-[10px] font-bold text-emerald-700">ว่าง</span>';
+                } else if (isPending) {
+                    cardClasses = 'bg-amber-50 hover:bg-amber-100 border-amber-400 text-amber-950';
+                    badgeText = `<span class="text-[10px] font-bold text-amber-700">${isMine ? 'กำลังตรวจสอบ (ของคุณ)' : 'กำลังตรวจสอบ'}</span>`;
+                } else if (isMine) {
+                    cardClasses = 'bg-brandOrange-500 hover:bg-brandOrange-600 border-brandOrange-600 text-white shadow-sm';
+                    badgeText = '<span class="text-[10px] font-bold text-white/95">สำเร็จ • ล็อกของคุณ</span>';
+                } else {
+                    cardClasses = 'bg-navy-800 hover:bg-navy-900 border-navy-900 text-white';
+                    badgeText = '<span class="text-[10px] font-medium text-navy-200">สำเร็จ • มีผู้เช่า</span>';
+                }
+
+                return `
+                    <button type="button" onclick="openStallModal('${stall.id}')" class="stall-card rounded-xl border p-2.5 flex flex-col items-center justify-between min-h-[74px] text-center cursor-pointer ${cardClasses}">
+                        <span class="font-bold text-sm tracking-tight">${stall.id}</span>
+                        ${badgeText}
+                        <span class="text-[10px] opacity-80 truncate w-full">${stall.status === 'available' ? '฿' + stall.rent.toLocaleString() : (stall.shopName || 'มีผู้เช่า')}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function getApprovalBadgeHtml(stall) {
+            const st = stall.approvalStatus || (stall.status === 'occupied' ? 'สำเร็จ' : 'กำลังตรวจสอบ');
+            if (st === 'สำเร็จ') {
+                return '<span class="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white text-[11px] font-bold">สำเร็จ (เข้าเช่าขายได้)</span>';
+            }
+            if (st === 'ไม่สำเร็จ') {
+                return '<span class="px-2.5 py-0.5 rounded-full bg-rose-600 text-white text-[11px] font-bold">ไม่สำเร็จ</span>';
+            }
+            return '<span class="px-2.5 py-0.5 rounded-full bg-amber-400 text-navy-950 text-[11px] font-bold">กำลังตรวจสอบ (รอแอดมินยืนยัน)</span>';
+        }
+
+        function openStallModal(stallId) {
+            const stall = appState.stalls.find(s => s.id === stallId);
+            if (!stall) return;
+
+            const modal = document.getElementById('stall-modal');
+            const badge = document.getElementById('modal-stall-badge');
+            const title = document.getElementById('modal-stall-title');
+            const body = document.getElementById('modal-stall-body');
+
+            badge.textContent = stall.id;
+            title.textContent = `โซน ${stall.zone} (${stall.zoneName})`;
+
+            const isMine = appState.currentUser && stall.ownerId === appState.currentUser.id;
+            const isAdmin = appState.currentUser && appState.currentUser.role === 'admin';
+            const isPending = stall.status === 'pending' || stall.approvalStatus === 'กำลังตรวจสอบ';
+
+            if (stall.status === 'available') {
+                const availableStalls = appState.stalls.filter(s => s.status === 'available' || s.id === stall.id);
+                body.innerHTML = `
+                    <div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-emerald-700 font-semibold">สถานะพื้นที่: ว่างพร้อมจอง & ชำระเงิน</p>
+                            <p id="book-rent-rate-label" class="text-lg font-bold text-navy-900">ค่าเช่า ฿${stall.rent.toLocaleString()} / เดือน</p>
+                        </div>
+                        <span class="px-3 py-1 rounded-full bg-emerald-600 text-white text-xs font-bold">ว่าง</span>
+                    </div>
+                    <p class="text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded-xl p-2.5">
+                        <i class="fa-solid fa-clock mr-1"></i> เมื่อส่งคำขอและแนบสลิปแล้ว ระบบจะบันทึกใบเสร็จไว้ในบัญชีลูกค้า และตั้งสถานะคำขอเช่าเป็น <strong>"กำลังตรวจสอบ"</strong> จนกว่าแอดมินจะยืนยัน <strong>"สำเร็จ"</strong> จึงจะเข้าเช่าขายได้
+                    </p>
+                    <form onsubmit="confirmStallBooking(event, '${stall.id}')" class="space-y-3 max-h-[68vh] overflow-y-auto pr-1">
+                        <div>
+                            <label for="book-select-stall-id" class="block text-xs font-bold text-navy-900 mb-1">เลือกล็อกที่จะขาย (ล็อกว่าง)</label>
+                            <select id="book-select-stall-id" onchange="switchBookingModalStall(this.value)" class="w-full px-3.5 py-2 rounded-xl border border-brandOrange-300 bg-brandOrange-50/40 text-sm font-bold text-navy-900 focus:outline-none focus:ring-2 focus:ring-brandOrange-500">
+                                ${availableStalls
+                                    .map(s => `<option value="${s.id}" ${s.id === stall.id ? 'selected' : ''}>ล็อก ${s.id} • โซน ${s.zone} (${s.zoneName}) • ฿${s.rent.toLocaleString()}/เดือน</option>`)
+                                    .join('')}
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label for="book-months" class="block text-xs font-bold text-navy-900 mb-1">ระยะเวลาเช่า (เดือน)</label>
+                                <select id="book-months" onchange="updateBookingPriceSummary(${stall.rent})" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-sm font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-brandOrange-500">
+                                    <option value="1" selected>1 เดือน</option>
+                                    <option value="3">3 เดือน</option>
+                                    <option value="6">6 เดือน</option>
+                                    <option value="12">12 เดือน</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-navy-900 mb-1">ยอดชำระค่าเช่า</label>
+                                <div id="book-total-amount-display" class="w-full px-3.5 py-2 rounded-xl bg-navy-900 text-brandOrange-400 font-bold text-sm text-right">
+                                    ฿${stall.rent.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-navy-900 mb-1">ชื่อผู้จอง</label>
+                            <input type="text" id="book-owner-name" required value="${appState.currentUser ? appState.currentUser.name : ''}" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-navy-900 mb-1">ชื่อร้านค้า</label>
+                            <input type="text" id="book-shop-name" required value="${appState.currentUser ? appState.currentUser.shopName : ''}" placeholder="เช่น ร้านเจ๊พร หมูสด" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-sm">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-navy-900 mb-1">เบอร์โทรศัพท์</label>
+                                <input type="tel" id="book-phone" required value="${appState.currentUser ? appState.currentUser.phone : ''}" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-navy-900 mb-1">สินค้าที่จำหน่าย</label>
+                                <input type="text" id="book-product" required value="${stall.zoneName}" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-sm">
+                            </div>
+                        </div>
+
+                        <!-- QR PromptPay & Slip Upload inside Booking Modal -->
+                        <div class="p-3.5 rounded-2xl bg-navy-50 border border-navy-200 space-y-2.5">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-xs font-bold text-navy-900"><i class="fa-solid fa-qrcode text-brandOrange-500 mr-1"></i>ชำระเงิน PromptPay & แนบสลิป</span>
+                                <span class="text-[10px] font-semibold text-slate-500">ตลาดตั้งเซียอวด นครปฐม</span>
+                            </div>
+                            <div class="flex items-center gap-3 bg-white p-2.5 rounded-xl border border-slate-200">
+                                <svg viewBox="0 0 100 100" class="w-16 h-16 text-navy-950 fill-current shrink-0">
+                                    <rect x="5" y="5" width="25" height="25" fill="none" stroke="currentColor" stroke-width="5"/>
+                                    <rect x="12" y="12" width="11" height="11"/>
+                                    <rect x="70" y="5" width="25" height="25" fill="none" stroke="currentColor" stroke-width="5"/>
+                                    <rect x="77" y="12" width="11" height="11"/>
+                                    <rect x="5" y="70" width="25" height="25" fill="none" stroke="currentColor" stroke-width="5"/>
+                                    <rect x="12" y="77" width="11" height="11"/>
+                                    <rect x="40" y="10" width="8" height="8"/><rect x="52" y="18" width="8" height="8"/>
+                                    <rect x="38" y="35" width="12" height="12"/><rect x="55" y="40" width="10" height="10"/>
+                                    <rect x="10" y="42" width="12" height="8"/><rect x="26" y="48" width="8" height="12"/>
+                                    <rect x="72" y="42" width="8" height="15"/><rect x="85" y="48" width="10" height="10"/>
+                                    <rect x="40" y="65" width="10" height="10"/><rect x="58" y="72" width="14" height="8"/>
+                                    <rect x="42" y="84" width="15" height="10"/><rect x="75" y="75" width="18" height="18"/>
+                                </svg>
+                                <div class="text-[11px] text-slate-600 space-y-0.5">
+                                    <p class="font-bold text-navy-900">สแกนจ่ายยอด <span id="book-qr-amount-text" class="text-brandOrange-600">฿${stall.rent.toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span></p>
+                                    <p>บัญชี: ตลาดตั้งเซียอวด นครปฐม</p>
+                                    <p class="text-emerald-700 font-medium">แนบสลิปเพื่อเก็บใบเสร็จในบัญชี</p>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="book-slip-file-input" class="block text-[11px] font-bold text-navy-900 mb-1">
+                                    <i class="fa-solid fa-paperclip text-brandOrange-600 mr-1"></i>แนบไฟล์รูปสลิปการโอนเงิน <span class="text-rose-600">* (จำเป็นต้องแนบสลิป)</span>
+                                </label>
+                                <input type="file" id="book-slip-file-input" accept="image/*" required onchange="handleBookingSlipChange(event)" class="block w-full text-xs text-slate-600 file:mr-2.5 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-navy-900 file:text-white hover:file:bg-brandOrange-500 cursor-pointer">
+                                <div id="book-slip-preview-box" class="hidden mt-2 p-2 rounded-xl bg-white border border-slate-200 flex items-center gap-2.5">
+                                    <img id="book-slip-preview-img" src="https://placehold.co/120x160/f1f5f9/0B2545?text=SLIP" alt="ตัวอย่างสลิปจองล็อก" class="w-12 h-16 object-cover rounded-lg border border-slate-300 shrink-0">
+                                    <div class="min-w-0 flex-1">
+                                        <p id="book-slip-file-name" class="text-xs font-bold text-navy-900 truncate"></p>
+                                        <p class="text-[10px] text-emerald-600 font-semibold"><i class="fa-solid fa-check-circle mr-1"></i>แนบสลิปพร้อมส่ง</p>
+                                    </div>
+                                    <button type="button" onclick="clearBookingSlipAttachment()" class="text-rose-600 hover:text-rose-800 p-1 text-xs" title="ลบรูปสลิป">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2.5 pt-2">
+                            <button type="button" onclick="closeStallModal()" class="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm">ปิด</button>
+                            <button type="submit" class="flex-1 py-2.5 rounded-xl bg-brandOrange-500 hover:bg-brandOrange-600 text-white font-bold text-sm shadow">ยืนยันจอง & ชำระล็อก ${stall.id}</button>
+                        </div>
+                    </form>
+                `;
+            } else {
+                body.innerHTML = `
+                    <div class="p-4 rounded-2xl bg-navy-50 border border-navy-200 space-y-2">
+                        <div class="flex items-center justify-between gap-2 flex-wrap">
+                            <span class="text-xs font-bold text-navy-700">สถานะการเช่าล็อก</span>
+                            ${getApprovalBadgeHtml(stall)}
+                        </div>
+                        <p class="text-base font-bold text-navy-900">${stall.shopName}</p>
+                        <p class="text-xs text-slate-600"><i class="fa-solid fa-user mr-1.5 text-navy-700"></i>ผู้เช่า: ${stall.ownerName}</p>
+                        <p class="text-xs text-slate-600"><i class="fa-solid fa-tag mr-1.5 text-brandOrange-500"></i>ประเภทสินค้า: ${stall.productType}</p>
+                        <p class="text-xs text-slate-600"><i class="fa-solid fa-phone mr-1.5 text-emerald-600"></i>เบอร์ติดต่อ: ${stall.phone}</p>
+                        <p class="text-xs font-bold text-navy-900 pt-1">อัตราค่าเช่า: ฿${stall.rent.toLocaleString()} / เดือน</p>
+                        ${isPending && !isAdmin ? '<p class="text-[11px] text-amber-800 bg-amber-100/80 p-2 rounded-lg mt-1"><i class="fa-solid fa-circle-info mr-1"></i>อยู่ระหว่างรอแอดมินตรวจสอบคำขอ ยังไม่สามารถเข้าขายสินค้าได้จนกว่าสถานะจะเป็น "สำเร็จ"</p>' : ''}
+                    </div>
+                    ${(isAdmin && isPending) ? `
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <button type="button" onclick="adminDecideStallBooking('${stall.id}', true)" class="py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow">
+                                <i class="fa-solid fa-check mr-1"></i> ยืนยันสถานะ: สำเร็จ
+                            </button>
+                            <button type="button" onclick="adminDecideStallBooking('${stall.id}', false)" class="py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow">
+                                <i class="fa-solid fa-xmark mr-1"></i> สถานะ: ไม่สำเร็จ
+                            </button>
+                        </div>
+                    ` : ''}
+                    <div class="flex gap-2.5 pt-2">
+                        <button type="button" onclick="closeStallModal()" class="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm">ปิดหน้าต่าง</button>
+                        ${(isMine || isAdmin) ? `
+                            <button type="button" onclick="releaseStall('${stall.id}')" class="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm shadow">
+                                <i class="fa-solid fa-rotate-left mr-1"></i> ${isPending ? 'ยกเลิกคำขอ' : 'คืนล็อก'}
+                            </button>
+                        ` : ''}
+                    </div>
+                `;
+            }
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function switchBookingModalStall(nextStallId) {
+            if (!nextStallId) return;
+            openStallModal(nextStallId);
+        }
+
+        function updateBookingPriceSummary(monthlyRent) {
+            const monthsSelect = document.getElementById('book-months');
+            const months = Math.max(1, parseInt(monthsSelect ? monthsSelect.value : '1', 10) || 1);
+            const total = Number(monthlyRent) * months;
+            const formatted = `฿${total.toLocaleString('th-TH', { minimumFractionDigits: 2 })}`;
+
+            const totalEl = document.getElementById('book-total-amount-display');
+            const qrAmountEl = document.getElementById('book-qr-amount-text');
+            if (totalEl) totalEl.textContent = formatted;
+            if (qrAmountEl) qrAmountEl.textContent = formatted;
+        }
+
+        function handleBookingSlipChange(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                showToast('กรุณาเลือกไฟล์รูปภาพสลิปเท่านั้น (JPG, PNG, WEBP)', 'error');
+                event.target.value = '';
+                return;
+            }
+
+            if (file.size > 2.5 * 1024 * 1024) {
+                showToast('ขนาดรูปสลิปควรไม่เกิน 2.5 MB เพื่อการสำรองข้อมูลที่รวดเร็ว', 'error');
+                event.target.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                appState.pendingSlipDataUrl = e.target.result;
+                appState.pendingSlipFileName = file.name;
+                document.getElementById('book-slip-preview-img').src = e.target.result;
+                document.getElementById('book-slip-file-name').textContent = file.name;
+                document.getElementById('book-slip-preview-box').classList.remove('hidden');
+                showToast(`แนบรูปสลิป "${file.name}" สำหรับการจองล็อกแล้ว`, 'success');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function clearBookingSlipAttachment() {
+            appState.pendingSlipDataUrl = null;
+            appState.pendingSlipFileName = '';
+            const input = document.getElementById('book-slip-file-input');
+            if (input) input.value = '';
+            const box = document.getElementById('book-slip-preview-box');
+            if (box) box.classList.add('hidden');
+        }
+
+        function closeStallModal() {
+            const modal = document.getElementById('stall-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            clearBookingSlipAttachment();
+        }
+
+        function confirmStallBooking(e, stallId) {
+            e.preventDefault();
+            const stall = appState.stalls.find(s => s.id === stallId);
+            if (!stall || !appState.currentUser) return;
+
+            const ownerName = document.getElementById('book-owner-name').value.trim();
+            const shopName = document.getElementById('book-shop-name').value.trim();
+            const phone = document.getElementById('book-phone').value.trim();
+            const productType = document.getElementById('book-product').value.trim();
+            const months = Math.max(1, parseInt(document.getElementById('book-months')?.value || '1', 10) || 1);
+            const totalRentAmount = Number(stall.rent) * months;
+            const billingLabel = months > 1 ? `ค่าเช่าล็อก ${months} เดือน` : 'ค่าเช่าล็อก 1 เดือน';
+            const newBillId = 'BK-' + Date.now().toString().slice(-6);
+            const receiptId = 'RCP-' + Date.now().toString().slice(-6);
+            const paidAtText = new Date().toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' });
+
+            let targetOwnerId = appState.currentUser.id;
+
+            if (sqlDb) {
+                const existingUser = dbQuery('SELECT user_id FROM users WHERE user_id = ?', [appState.currentUser.id]);
+                if (existingUser.length === 0) {
+                    targetOwnerId = 'u-admin-walkin-' + Date.now();
+                    dbRun(
+                        'INSERT INTO users (user_id, first_name, last_name, full_name, email, phone, password_hash, shop_name, details) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                        [targetOwnerId, ownerName, '', ownerName, `${targetOwnerId}@market.local`, phone, '1234', shopName, productType]
+                    );
+                }
+
+                // Set status = 'pending' and approval_status = 'กำลังตรวจสอบ' until Admin confirms
+                dbRun(
+                    'UPDATE stalls SET status = ?, approval_status = ?, owner_id = ?, booking_shop_name = ?, booking_phone = ?, product_type = ? WHERE stall_id = ?',
+                    ['pending', 'กำลังตรวจสอบ', targetOwnerId, shopName, phone, productType, stall.id]
+                );
+
+                dbRun(
+                    'INSERT INTO bills (bill_id, billing_month, stall_id, user_id, rent_amount, water_units, water_cost, elec_units, elec_cost, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                    [newBillId, billingLabel, stall.id, targetOwnerId, totalRentAmount, 0, 0, 0, 0, 'paid']
+                );
+
+                persistRelationalDatabase();
+                syncStateFromRelationalDb();
+            } else {
+                stall.status = 'pending';
+                stall.approvalStatus = 'กำลังตรวจสอบ';
+                stall.ownerId = targetOwnerId;
+                stall.ownerName = ownerName;
+                stall.shopName = shopName;
+                stall.phone = phone;
+                stall.productType = productType;
+
+                appState.bills.unshift({
+                    id: newBillId,
+                    month: billingLabel,
+                    stallId: stall.id,
+                    ownerId: targetOwnerId,
+                    ownerName,
+                    rent: totalRentAmount,
+                    waterUnits: 0,
+                    waterCost: 0,
+                    elecUnits: 0,
+                    elecCost: 0,
+                    status: 'paid'
+                });
+            }
+
+            // Save receipt & slip inside customer's account
+            const bookingReceipt = {
+                receiptId,
+                billId: newBillId,
+                stallId: stall.id,
+                ownerId: targetOwnerId,
+                ownerName,
+                month: `${billingLabel} (รอแอดมินยืนยันเข้าขาย)`,
+                amount: totalRentAmount,
+                paidAtText,
+                slipFileName: appState.pendingSlipFileName || 'ยืนยันชำระค่าจองล็อก',
+                slipDataUrl: appState.pendingSlipDataUrl || null
+            };
+            appState.receipts = appState.receipts.filter(r => r.billId !== newBillId);
+            appState.receipts.unshift(bookingReceipt);
+
+            closeStallModal();
+            renderStalls();
+            renderBills();
+            renderCustomerReceipts();
+            renderAdminDashboard();
+            saveCustomerBackup();
+            showToast(`จองล็อก ${stall.id} ยอด ฿${totalRentAmount.toLocaleString()} และเก็บใบเสร็จแล้ว • สถานะ: "กำลังตรวจสอบ"`, 'success');
+        }
+
+        function confirmStallBooking(e, stallId) {
+            e.preventDefault();
+            const stall = appState.stalls.find(s => s.id === stallId);
+            if (!stall || !appState.currentUser) return;
+
+            if (!appState.pendingSlipDataUrl) {
+                showToast('กรุณาแนบไฟล์รูปสลิปการโอนเงินก่อนยืนยันการจองล็อก', 'error');
+                const slipInput = document.getElementById('book-slip-file-input');
+                if (slipInput) slipInput.focus();
+                return;
+            }
+
+            const ownerName = document.getElementById('book-owner-name').value.trim();
+            const shopName = document.getElementById('book-shop-name').value.trim();
+            const phone = document.getElementById('book-phone').value.trim();
+            const productType = document.getElementById('book-product').value.trim();
+            const months = Math.max(1, parseInt(document.getElementById('book-months')?.value || '1', 10) || 1);
+            const totalRentAmount = Number(stall.rent) * months;
+            const billingLabel = months > 1 ? `ค่าเช่าล็อก ${months} เดือน` : 'ค่าเช่าล็อก 1 เดือน';
+            const newBillId = 'BK-' + Date.now().toString().slice(-6);
+            const receiptId = 'RCP-' + Date.now().toString().slice(-6);
+            const paidAtText = new Date().toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' });
+
+            let targetOwnerId = appState.currentUser.id;
+
+            if (sqlDb) {
+                const existingUser = dbQuery('SELECT user_id FROM users WHERE user_id = ?', [appState.currentUser.id]);
+                if (existingUser.length === 0) {
+                    targetOwnerId = 'u-admin-walkin-' + Date.now();
+                    dbRun(
+                        'INSERT INTO users (user_id, first_name, last_name, full_name, email, phone, password_hash, shop_name, details) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                        [targetOwnerId, ownerName, '', ownerName, `${targetOwnerId}@market.local`, phone, '1234', shopName, productType]
+                    );
+                }
+
+                dbRun(
+                    'UPDATE stalls SET status = ?, approval_status = ?, owner_id = ?, booking_shop_name = ?, booking_phone = ?, product_type = ? WHERE stall_id = ?',
+                    ['pending', 'กำลังตรวจสอบ', targetOwnerId, shopName, phone, productType, stall.id]
+                );
+
+                dbRun(
+                    'INSERT INTO bills (bill_id, billing_month, stall_id, user_id, rent_amount, water_units, water_cost, elec_units, elec_cost, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                    [newBillId, billingLabel, stall.id, targetOwnerId, totalRentAmount, 0, 0, 0, 0, 'paid']
+                );
+
+                persistRelationalDatabase();
+                syncStateFromRelationalDb();
+            } else {
+                stall.status = 'pending';
+                stall.approvalStatus = 'กำลังตรวจสอบ';
+                stall.ownerId = targetOwnerId;
+                stall.ownerName = ownerName;
+                stall.shopName = shopName;
+                stall.phone = phone;
+                stall.productType = productType;
+
+                appState.bills.unshift({
+                    id: newBillId,
+                    month: billingLabel,
+                    stallId: stall.id,
+                    ownerId: targetOwnerId,
+                    ownerName,
+                    rent: totalRentAmount,
+                    waterUnits: 0,
+                    waterCost: 0,
+                    elecUnits: 0,
+                    elecCost: 0,
+                    status: 'paid'
+                });
+            }
+
+            const bookingReceipt = {
+                receiptId,
+                billId: newBillId,
+                stallId: stall.id,
+                ownerId: targetOwnerId,
+                ownerName,
+                month: `${billingLabel} (รอแอดมินยืนยันเข้าขาย)`,
+                amount: totalRentAmount,
+                paidAtText,
+                slipFileName: appState.pendingSlipFileName,
+                slipDataUrl: appState.pendingSlipDataUrl
+            };
+            appState.receipts = appState.receipts.filter(r => r.billId !== newBillId);
+            appState.receipts.unshift(bookingReceipt);
+
+            closeStallModal();
+            renderStalls();
+            renderBills();
+            renderCustomerReceipts();
+            renderAdminDashboard();
+            saveCustomerBackup();
+            showToast(`จองล็อก ${stall.id} ยอด ฿${totalRentAmount.toLocaleString()} และเก็บใบเสร็จแล้ว • สถานะ: "กำลังตรวจสอบ"`, 'success');
+        }
+
+        function adminDecideStallBooking(stallId, isApproved) {
+            const stall = appState.stalls.find(s => s.id === stallId);
+            if (!stall) return;
+
+            if (isApproved) {
+                const newBillId = 'INV-' + Math.floor(1000 + Math.random() * 9000);
+                if (sqlDb) {
+                    dbRun(
+                        'UPDATE stalls SET status = ?, approval_status = ? WHERE stall_id = ?',
+                        ['occupied', 'สำเร็จ', stallId]
+                    );
+                    dbRun(
+                        'INSERT INTO bills (bill_id, billing_month, stall_id, user_id, rent_amount, water_units, water_cost, elec_units, elec_cost, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                        [newBillId, 'พฤศจิกายน 2569', stall.id, stall.ownerId, stall.rent, 0, 0, 0, 0, 'unpaid']
+                    );
+                    persistRelationalDatabase();
+                    syncStateFromRelationalDb();
+                } else {
+                    stall.status = 'occupied';
+                    stall.approvalStatus = 'สำเร็จ';
+                    appState.bills.unshift({
+                        id: newBillId,
+                        month: 'พฤศจิกายน 2569',
+                        stallId: stall.id,
+                        ownerId: stall.ownerId,
+                        ownerName: stall.ownerName,
+                        rent: stall.rent,
+                        waterUnits: 0, waterCost: 0, elecUnits: 0, elecCost: 0,
+                        status: 'unpaid'
+                    });
+                }
+                showToast(`แอดมินยืนยันคำขอเช่าล็อก ${stallId} • สถานะ: "สำเร็จ" (พร้อมเข้าเช่าขายสินค้า)`, 'success');
+            } else {
+                if (sqlDb) {
+                    dbRun(
+                        'UPDATE stalls SET status = ?, approval_status = ?, owner_id = NULL, booking_shop_name = NULL, booking_phone = NULL, product_type = NULL WHERE stall_id = ?',
+                        ['available', 'ไม่สำเร็จ', stallId]
+                    );
+                    persistRelationalDatabase();
+                    syncStateFromRelationalDb();
+                } else {
+                    stall.status = 'available';
+                    stall.approvalStatus = 'ไม่สำเร็จ';
+                    stall.ownerId = null;
+                    stall.ownerName = null;
+                    stall.shopName = null;
+                    stall.phone = null;
+                    stall.productType = null;
+                }
+                showToast(`คำขอเช่าล็อก ${stallId} สถานะ: "ไม่สำเร็จ" (คืนล็อกให้ว่างในระบบแล้ว)`, 'error');
+            }
+
+            closeStallModal();
+            renderStalls();
+            renderBills();
+            renderAdminDashboard();
+            saveCustomerBackup();
+        }
+
+        function releaseStall(stallId) {
+            const stall = appState.stalls.find(s => s.id === stallId);
+            if (!stall) return;
+
+            if (sqlDb) {
+                dbRun(
+                    'UPDATE stalls SET status = ?, approval_status = ?, owner_id = NULL, booking_shop_name = NULL, booking_phone = NULL, product_type = NULL WHERE stall_id = ?',
+                    ['available', 'none', stallId]
+                );
+                persistRelationalDatabase();
+                syncStateFromRelationalDb();
+            } else {
+                stall.status = 'available';
+                stall.approvalStatus = 'none';
+                stall.ownerId = null;
+                stall.ownerName = null;
+                stall.shopName = null;
+                stall.phone = null;
+                stall.productType = null;
+            }
+
+            closeStallModal();
+            renderStalls();
+            renderAdminDashboard();
+            saveCustomerBackup();
+            showToast(`คืนพื้นที่ล็อก ${stallId} (UPDATE stalls SET status='available') แล้ว`, 'info');
+        }
+
+        // ==========================================
+        // RENTAL & UTILITY BILLS + SLIP + RECEIPT LOGIC
+        // ==========================================
+        function handleSlipFileChange(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                showToast('กรุณาเลือกไฟล์รูปภาพสลิปเท่านั้น (JPG, PNG, WEBP)', 'error');
+                event.target.value = '';
+                return;
+            }
+
+            if (file.size > 2.5 * 1024 * 1024) {
+                showToast('ขนาดรูปสลิปควรไม่เกิน 2.5 MB เพื่อการสำรองข้อมูลที่รวดเร็ว', 'error');
+                event.target.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                appState.pendingSlipDataUrl = e.target.result;
+                appState.pendingSlipFileName = file.name;
+                document.getElementById('slip-preview-img').src = e.target.result;
+                document.getElementById('slip-file-name').textContent = file.name;
+                document.getElementById('slip-preview-box').classList.remove('hidden');
+                showToast(`แนบรูปสลิป "${file.name}" เรียบร้อยแล้ว`, 'success');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function clearSlipAttachment() {
+            appState.pendingSlipDataUrl = null;
+            appState.pendingSlipFileName = '';
+            const input = document.getElementById('slip-file-input');
+            if (input) input.value = '';
+            const box = document.getElementById('slip-preview-box');
+            if (box) box.classList.add('hidden');
+        }
+
+        function renderBills() {
+            const tbody = document.getElementById('bills-table-body');
+            const notice = document.getElementById('payment-user-notice');
+            if (!appState.currentUser) return;
+
+            const isAdmin = appState.currentUser.role === 'admin';
+            const visibleBills = isAdmin
+                ? appState.bills
+                : appState.bills.filter(b => b.ownerId === appState.currentUser.id);
+
+            notice.textContent = isAdmin
+                ? `โหมดแอดมิน: แสดงบิลทั้งหมดในระบบ (${visibleBills.length} รายการ)`
+                : `บัญชีผู้เช่า: ${appState.currentUser.name} (${visibleBills.length} รายการ)`;
+
+            const totalUnpaid = visibleBills
+                .filter(b => b.status === 'unpaid')
+                .reduce((sum, b) => sum + b.rent + b.waterCost + b.elecCost, 0);
+
+            document.getElementById('total-unpaid-amount').textContent = `฿${totalUnpaid.toLocaleString('th-TH', { minimumFractionDigits: 2 })}`;
+
+            if (visibleBills.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="py-8 text-center text-slate-400 text-sm">
+                            ยังไม่มีรายการบิลค่าเช่าหรือค่าน้ำ-ค่าไฟในบัญชีนี้
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = visibleBills.map(bill => {
+                const total = bill.rent + bill.waterCost + bill.elecCost;
+                const isPaid = bill.status === 'paid';
+                const linkedReceipt = appState.receipts.find(r => r.billId === bill.id);
+
+                return `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="py-3.5 px-4">
+                            <p class="font-bold text-navy-900 text-xs">${bill.id}</p>
+                            <p class="text-[11px] text-slate-500">${bill.month}</p>
+                        </td>
+                        <td class="py-3.5 px-4">
+                            <span class="px-2 py-0.5 rounded bg-navy-100 text-navy-900 font-bold text-xs">${bill.stallId}</span>
+                            <span class="text-xs text-slate-600 ml-1">${bill.ownerName}</span>
+                        </td>
+                        <td class="py-3.5 px-4 text-right font-medium text-xs">฿${bill.rent.toLocaleString()}</td>
+                        <td class="py-3.5 px-4 text-right text-xs">
+                            <span class="font-medium">฿${bill.waterCost.toLocaleString()}</span>
+                            <span class="block text-[10px] text-slate-400">(${bill.waterUnits} หน่วย)</span>
+                        </td>
+                        <td class="py-3.5 px-4 text-right text-xs">
+                            <span class="font-medium">฿${bill.elecCost.toLocaleString()}</span>
+                            <span class="block text-[10px] text-slate-400">(${bill.elecUnits} หน่วย)</span>
+                        </td>
+                        <td class="py-3.5 px-4 text-right font-bold text-navy-900 text-sm">฿${total.toLocaleString()}</td>
+                        <td class="py-3.5 px-4 text-center">
+                            ${isPaid
+                                ? '<span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 font-bold text-[11px]">ชำระแล้ว</span>'
+                                : '<span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 font-bold text-[11px]">รอชำระ</span>'
+                            }
+                        </td>
+                        <td class="py-3.5 px-4 text-center">
+                            ${isPaid
+                                ? `<button onclick="openReceiptModal('${linkedReceipt ? linkedReceipt.receiptId : bill.id}', '${bill.id}')" class="px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-bold text-xs transition"><i class="fa-solid fa-receipt mr-1"></i>ดูใบเสร็จ</button>`
+                                : `<button onclick="openPaymentModal('${bill.id}')" class="px-3 py-1.5 rounded-lg bg-brandOrange-500 hover:bg-brandOrange-600 text-white font-bold text-xs shadow-xs transition"><i class="fa-solid fa-paperclip mr-1"></i>แนบสลิป & จ่าย</button>`
+                            }
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderCustomerReceipts() {
+            const grid = document.getElementById('customer-receipts-grid');
+            const badge = document.getElementById('receipts-count-badge');
+            if (!grid || !appState.currentUser) return;
+
+            const isAdmin = appState.currentUser.role === 'admin';
+            const userReceipts = isAdmin
+                ? appState.receipts
+                : appState.receipts.filter(r => r.ownerId === appState.currentUser.id);
+
+            if (badge) badge.textContent = `${userReceipts.length} ใบเสร็จ`;
+
+            if (userReceipts.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full p-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 text-center text-xs text-slate-500">
+                        ยังไม่มีใบเสร็จในบัญชีนี้ — เมื่อกดชำระเงินและแนบสลิป ระบบจะสร้างใบเสร็จเก็บไว้ในบัญชีและสำรองข้อมูลให้อัตโนมัติ
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = userReceipts.map(rec => `
+                <div class="rounded-2xl border border-emerald-200 bg-emerald-50/40 p-4 flex items-center gap-3.5 shadow-2xs">
+                    <img src="${rec.slipDataUrl || 'https://placehold.co/120x160/e2e8f0/0B2545?text=RECEIPT'}"
+                         onerror="this.src='https://placehold.co/120x160/e2e8f0/0B2545?text=RECEIPT';"
+                         alt="สลิปใบเสร็จ ${rec.receiptId}"
+                         class="w-14 h-20 object-cover rounded-xl border border-slate-300 bg-white shrink-0">
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="font-bold text-xs text-navy-900 truncate">${rec.receiptId}</span>
+                            <span class="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-bold shrink-0">ใบเสร็จ</span>
+                        </div>
+                        <p class="text-[11px] text-slate-600 mt-0.5 truncate">บิล #${rec.billId} • ล็อก ${rec.stallId}</p>
+                        <p class="text-sm font-bold text-emerald-700 mt-1">฿${Number(rec.amount).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</p>
+                        <div class="flex items-center justify-between mt-1.5">
+                            <span class="text-[10px] text-slate-400 truncate">${rec.paidAtText}</span>
+                            <button onclick="openReceiptModal('${rec.receiptId}', '${rec.billId}')" class="text-[11px] font-bold text-navy-800 hover:text-brandOrange-600 underline shrink-0">เปิดดู</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openReceiptModal(receiptId, billId) {
+            const modal = document.getElementById('receipt-modal');
+            const body = document.getElementById('receipt-modal-body');
+            let rec = appState.receipts.find(r => r.receiptId === receiptId || r.billId === billId);
+
+            if (!rec) {
+                const bill = appState.bills.find(b => b.id === billId);
+                if (!bill) return;
+                rec = {
+                    receiptId: 'RCP-' + bill.id,
+                    billId: bill.id,
+                    stallId: bill.stallId,
+                    ownerName: bill.ownerName,
+                    month: bill.month,
+                    amount: bill.rent + bill.waterCost + bill.elecCost,
+                    paidAtText: 'บันทึกจากระบบตลาดตั้งเซียอวด',
+                    slipFileName: 'ใบเสร็จระบบ (ไม่แนบไฟล์สลิป)',
+                    slipDataUrl: null
+                };
+            }
+
+            body.innerHTML = `
+                <div class="p-4 rounded-2xl bg-navy-50 border border-navy-200 space-y-1.5">
+                    <div class="flex justify-between"><span class="text-slate-500">เลขที่ใบเสร็จ:</span><span class="font-bold text-navy-900">${rec.receiptId}</span></div>
+                    <div class="flex justify-between"><span class="text-slate-500">เลขที่บิล / รอบ:</span><span class="font-semibold">${rec.billId} (${rec.month})</span></div>
+                    <div class="flex justify-between"><span class="text-slate-500">ล็อก / ผู้เช่า:</span><span class="font-semibold">${rec.stallId} • ${rec.ownerName}</span></div>
+                    <div class="flex justify-between"><span class="text-slate-500">วันที่ชำระ:</span><span>${rec.paidAtText}</span></div>
+                    <div class="pt-2 mt-2 border-t border-navy-200 flex justify-between items-center">
+                        <span class="font-bold text-navy-900">ยอดชำระสุทธิ:</span>
+                        <span class="text-lg font-bold text-emerald-700">฿${Number(rec.amount).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
+                    </div>
+                </div>
+                <div class="space-y-1.5">
+                    <p class="font-bold text-navy-900">หลักฐานสลิปที่แนบ (${rec.slipFileName || 'ไม่มีไฟล์แนบ'}):</p>
+                    ${rec.slipDataUrl
+                        ? `<img src="${rec.slipDataUrl}" alt="สลิปการโอนเงิน" class="w-full max-h-64 object-contain rounded-2xl border border-slate-200 bg-slate-50">`
+                        : `<div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center text-slate-500">ยืนยันการชำระเงินผ่านระบบ (ไม่ได้แนบไฟล์ภาพสลิป)</div>`
+                    }
+                </div>
+                <button type="button" onclick="closeReceiptModal()" class="w-full py-2.5 rounded-xl bg-navy-900 hover:bg-navy-800 text-white font-bold text-sm">ปิดใบเสร็จ</button>
+            `;
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeReceiptModal() {
+            const modal = document.getElementById('receipt-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function openPaymentModal(billId) {
+            const bill = appState.bills.find(b => b.id === billId);
+            if (!bill) return;
+
+            clearSlipAttachment();
+            appState.activePaymentBillId = billId;
+            const total = bill.rent + bill.waterCost + bill.elecCost;
+
+            document.getElementById('pay-modal-bill-info').textContent = `บิลเลขที่ #${bill.id} • ล็อก ${bill.stallId} (${bill.month})`;
+            document.getElementById('pay-modal-amount').textContent = `฿${total.toLocaleString('th-TH', { minimumFractionDigits: 2 })}`;
+
+            const modal = document.getElementById('payment-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closePaymentModal() {
+            const modal = document.getElementById('payment-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            appState.activePaymentBillId = null;
+            clearSlipAttachment();
+        }
+
+        function confirmBillPayment() {
+            if (!appState.activePaymentBillId) return;
+            const billId = appState.activePaymentBillId;
+            const bill = appState.bills.find(b => b.id === billId);
+            if (!bill) return;
+
+            const totalAmount = bill.rent + bill.waterCost + bill.elecCost;
+            const receiptId = 'RCP-' + Date.now().toString().slice(-6);
+            const paidAtText = new Date().toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' });
+
+            const newReceipt = {
+                receiptId,
+                billId: bill.id,
+                stallId: bill.stallId,
+                ownerId: bill.ownerId,
+                ownerName: bill.ownerName,
+                month: bill.month,
+                amount: totalAmount,
+                paidAtText,
+                slipFileName: appState.pendingSlipFileName || 'ยืนยันชำระผ่าน QR',
+                slipDataUrl: appState.pendingSlipDataUrl || null
+            };
+
+            // Avoid duplicate receipt for same bill
+            appState.receipts = appState.receipts.filter(r => r.billId !== bill.id);
+            appState.receipts.unshift(newReceipt);
+
+            if (sqlDb) {
+                dbRun('UPDATE bills SET status = ? WHERE bill_id = ?', ['paid', billId]);
+                persistRelationalDatabase();
+                syncStateFromRelationalDb();
+            } else {
+                bill.status = 'paid';
+            }
+
+            saveCustomerBackup();
+            renderBills();
+            renderCustomerReceipts();
+            renderAdminDashboard();
+            showToast(`ส่งสลิปและออกใบเสร็จ ${receiptId} เก็บไว้ในบัญชีลูกค้าแล้ว!`, 'success');
+            closePaymentModal();
+        }
+
+        // ==========================================
+        // ADMIN DASHBOARD & CREATE BILL LOGIC
+        // ==========================================
+        function renderAdminDashboard() {
+            const pendingStalls = appState.stalls.filter(s => s.status === 'pending' || s.approvalStatus === 'กำลังตรวจสอบ');
+            const occupiedStalls = appState.stalls.filter(s => s.status === 'occupied');
+            const paidTotal = appState.bills.filter(b => b.status === 'paid').reduce((s, b) => s + b.rent + b.waterCost + b.elecCost, 0);
+            const unpaidTotal = appState.bills.filter(b => b.status === 'unpaid').reduce((s, b) => s + b.rent + b.waterCost + b.elecCost, 0);
+
+            const pendingStatEl = document.getElementById('admin-stat-pending');
+            const pendingBadgeEl = document.getElementById('admin-pending-badge');
+            const pendingListEl = document.getElementById('admin-pending-bookings-list');
+
+            if (pendingStatEl) pendingStatEl.textContent = `${pendingStalls.length} รายการ`;
+            if (pendingBadgeEl) pendingBadgeEl.textContent = `${pendingStalls.length} รายการ`;
+
+            if (pendingListEl) {
+                if (pendingStalls.length === 0) {
+                    pendingListEl.innerHTML = '<div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center text-xs text-slate-500">ไม่มีคำขอเช่าล็อกที่รอการตรวจสอบในขณะนี้</div>';
+                } else {
+                    pendingListEl.innerHTML = pendingStalls.map(s => `
+                        <div class="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div class="space-y-0.5 min-w-0">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="px-2.5 py-0.5 rounded-lg bg-navy-900 text-white font-bold text-xs">${s.id}</span>
+                                    <span class="px-2.5 py-0.5 rounded-full bg-amber-400 text-navy-950 font-bold text-[11px]">กำลังตรวจสอบ</span>
+                                    <span class="text-xs font-bold text-navy-900">${s.shopName || 'ร้านค้า'}</span>
+                                </div>
+                                <p class="text-xs text-slate-600">ผู้ขอเช่า: <strong>${s.ownerName || '-'}</strong> • โทร: ${s.phone || '-'} • สินค้า: ${s.productType || s.zoneName} • ค่าเช่า ฿${s.rent.toLocaleString()}/เดือน</p>
+                            </div>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <button type="button" onclick="adminDecideStallBooking('${s.id}', true)" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow transition">
+                                    <i class="fa-solid fa-check mr-1"></i> ยืนยันสำเร็จ
+                                </button>
+                                <button type="button" onclick="adminDecideStallBooking('${s.id}', false)" class="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow transition">
+                                    <i class="fa-solid fa-xmark mr-1"></i> ไม่สำเร็จ
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            }
+
+            document.getElementById('admin-stat-occupied').textContent = `${occupiedStalls.length} / 200`;
+            document.getElementById('admin-stat-paid').textContent = `฿${paidTotal.toLocaleString()}`;
+            document.getElementById('admin-stat-unpaid').textContent = `฿${unpaidTotal.toLocaleString()}`;
+            const usersStatEl = document.getElementById('admin-stat-users');
+            if (usersStatEl) usersStatEl.textContent = `สมาชิก: ${appState.users.length} คน`;
+            // Occupied Stalls Table
+            const search = (document.getElementById('admin-search-stall')?.value || '').trim().toLowerCase();
+            const filteredOccupied = occupiedStalls.filter(s =>
+                !search ||
+                s.id.toLowerCase().includes(search) ||
+                (s.ownerName && s.ownerName.toLowerCase().includes(search)) ||
+                (s.shopName && s.shopName.toLowerCase().includes(search))
+            );
+
+            const tbody = document.getElementById('admin-stalls-tbody');
+            tbody.innerHTML = filteredOccupied.map(s => `
+                <tr class="hover:bg-slate-50">
+                    <td class="py-2.5 px-3 font-bold text-navy-900">${s.id}</td>
+                    <td class="py-2.5 px-3">
+                        <p class="font-semibold text-slate-800">${s.shopName}</p>
+                        <p class="text-[11px] text-slate-500">${s.ownerName}</p>
+                    </td>
+                    <td class="py-2.5 px-3 text-slate-600">${s.phone}</td>
+                    <td class="py-2.5 px-3 text-right font-semibold">฿${s.rent.toLocaleString()}</td>
+                    <td class="py-2.5 px-3 text-center">
+                        <button onclick="releaseStall('${s.id}')" class="px-2.5 py-1 rounded bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold text-[11px]">คืนล็อก</button>
+                    </td>
+                </tr>
+            `).join('') || '<tr><td colspan="5" class="py-6 text-center text-slate-400">ไม่พบข้อมูลล็อกที่ถูกจอง</td></tr>';
+
+            // Registered Users List
+            const usersContainer = document.getElementById('admin-users-list');
+            usersContainer.innerHTML = appState.users.map(u => `
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-2">
+                    <div class="min-w-0">
+                        <p class="font-bold text-xs text-navy-900 truncate">${u.firstName} ${u.lastName}</p>
+                        <p class="text-[11px] text-brandOrange-600 font-medium truncate">${u.shopName || 'ร้านค้าทั่วไป'}</p>
+                        <p class="text-[10px] text-slate-500 truncate">${u.email} • ${u.phone}</p>
+                    </div>
+                    <span class="px-2 py-1 rounded-lg bg-navy-100 text-navy-800 text-[10px] font-bold shrink-0">ผู้เช่า</span>
+                </div>
+            `).join('');
+        }
+
+        function openCreateBillModal() {
+            const occupiedStalls = appState.stalls.filter(s => s.status === 'occupied');
+            if (occupiedStalls.length === 0) {
+                showToast('ยังไม่มีล็อกที่มีผู้เช่าสำหรับออกบิล', 'error');
+                return;
+            }
+
+            const select = document.getElementById('bill-stall-select');
+            select.innerHTML = occupiedStalls.map(s =>
+                `<option value="${s.id}">${s.id} - ${s.shopName} (${s.ownerName}) | ค่าเช่า ฿${s.rent}</option>`
+            ).join('');
+
+            const modal = document.getElementById('create-bill-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeCreateBillModal() {
+            const modal = document.getElementById('create-bill-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function handleCreateBill(e) {
+            e.preventDefault();
+            const stallId = document.getElementById('bill-stall-select').value;
+            const month = document.getElementById('bill-month').value.trim();
+            const waterUnits = parseInt(document.getElementById('bill-water-units').value, 10) || 0;
+            const elecUnits = parseInt(document.getElementById('bill-elec-units').value, 10) || 0;
+
+            const stall = appState.stalls.find(s => s.id === stallId);
+            if (!stall) return;
+
+            const newBillId = 'INV-' + Math.floor(1000 + Math.random() * 9000);
+            const waterCost = waterUnits * 18;
+            const elecCost = elecUnits * 7;
+
+            if (sqlDb) {
+                dbRun(
+                    'INSERT INTO bills (bill_id, billing_month, stall_id, user_id, rent_amount, water_units, water_cost, elec_units, elec_cost, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                    [newBillId, month, stall.id, stall.ownerId, stall.rent, waterUnits, waterCost, elecUnits, elecCost, 'unpaid']
+                );
+                persistRelationalDatabase();
+                syncStateFromRelationalDb();
+            } else {
+                appState.bills.unshift({
+                    id: newBillId,
+                    month,
+                    stallId: stall.id,
+                    ownerId: stall.ownerId,
+                    ownerName: stall.ownerName,
+                    rent: stall.rent,
+                    waterUnits,
+                    waterCost,
+                    elecUnits,
+                    elecCost,
+                    status: 'unpaid'
+                });
+            }
+
+            closeCreateBillModal();
+            renderBills();
+            renderAdminDashboard();
+            saveCustomerBackup();
+            showToast(`บันทึกบิล #${newBillId} ลงตาราง bills เรียบร้อยแล้ว`, 'success');
+        }
+
+        // ==========================================
+        // RELATIONAL SQL CONSOLE, DDL & EXPORT LOGIC
+        // ==========================================
+        function getSqlDdlByDialect(dialect) {
+            if (dialect === 'postgres') {
+                return `-- PostgreSQL 16 Relational Schema (ตลาดตั้งเซียอวด นครปฐม)
+CREATE TABLE zones (
+    zone_code VARCHAR(5) PRIMARY KEY,
+    zone_name VARCHAR(100) NOT NULL,
+    base_rent NUMERIC(10,2) NOT NULL
+);
+
+CREATE TABLE users (
+    user_id VARCHAR(36) PRIMARY KEY,
+    first_name VARCHAR(60) NOT NULL,
+    last_name VARCHAR(60) NOT NULL,
+    full_name VARCHAR(120) NOT NULL,
+    email VARCHAR(120) UNIQUE NOT NULL,
+    phone VARCHAR(25) NOT NULL,
+    password_hash VARCHAR(120) NOT NULL,
+    shop_name VARCHAR(150),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE stalls (
+    stall_id VARCHAR(10) PRIMARY KEY,
+    zone_code VARCHAR(5) NOT NULL REFERENCES zones(zone_code) ON UPDATE CASCADE,
+    status VARCHAR(20) NOT NULL DEFAULT 'available',
+    owner_id VARCHAR(36) NULL REFERENCES users(user_id) ON DELETE SET NULL,
+    booking_shop_name VARCHAR(150),
+    booking_phone VARCHAR(25),
+    product_type VARCHAR(150)
+);
+
+CREATE TABLE bills (
+    bill_id VARCHAR(20) PRIMARY KEY,
+    billing_month VARCHAR(50) NOT NULL,
+    stall_id VARCHAR(10) NOT NULL REFERENCES stalls(stall_id) ON DELETE CASCADE,
+    user_id VARCHAR(36) NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    rent_amount NUMERIC(10,2) NOT NULL,
+    water_units INT NOT NULL DEFAULT 0,
+    water_cost NUMERIC(10,2) NOT NULL DEFAULT 0,
+    elec_units INT NOT NULL DEFAULT 0,
+    elec_cost NUMERIC(10,2) NOT NULL DEFAULT 0,
+    status VARCHAR(20) NOT NULL DEFAULT 'unpaid'
+);`;
+            }
+
+            if (dialect === 'mssql') {
+                return `-- Microsoft SQL Server (T-SQL) Relational Schema
+CREATE TABLE zones (
+    zone_code NVARCHAR(5) PRIMARY KEY,
+    zone_name NVARCHAR(100) NOT NULL,
+    base_rent DECIMAL(10,2) NOT NULL
+);
+
+CREATE TABLE users (
+    user_id NVARCHAR(36) PRIMARY KEY,
+    first_name NVARCHAR(60) NOT NULL,
+    last_name NVARCHAR(60) NOT NULL,
+    full_name NVARCHAR(120) NOT NULL,
+    email NVARCHAR(120) UNIQUE NOT NULL,
+    phone NVARCHAR(25) NOT NULL,
+    password_hash NVARCHAR(120) NOT NULL,
+    shop_name NVARCHAR(150),
+    created_at DATETIME2 DEFAULT GETDATE()
+);
+
+CREATE TABLE stalls (
+    stall_id NVARCHAR(10) PRIMARY KEY,
+    zone_code NVARCHAR(5) NOT NULL FOREIGN KEY REFERENCES zones(zone_code),
+    status NVARCHAR(20) NOT NULL DEFAULT 'available',
+    owner_id NVARCHAR(36) NULL FOREIGN KEY REFERENCES users(user_id),
+    booking_shop_name NVARCHAR(150),
+    booking_phone NVARCHAR(25),
+    product_type NVARCHAR(150)
+);
+
+CREATE TABLE bills (
+    bill_id NVARCHAR(20) PRIMARY KEY,
+    billing_month NVARCHAR(50) NOT NULL,
+    stall_id NVARCHAR(10) NOT NULL FOREIGN KEY REFERENCES stalls(stall_id),
+    user_id NVARCHAR(36) NOT NULL FOREIGN KEY REFERENCES users(user_id),
+    rent_amount DECIMAL(10,2) NOT NULL,
+    water_units INT NOT NULL DEFAULT 0,
+    water_cost DECIMAL(10,2) NOT NULL DEFAULT 0,
+    elec_units INT NOT NULL DEFAULT 0,
+    elec_cost DECIMAL(10,2) NOT NULL DEFAULT 0,
+    status NVARCHAR(20) NOT NULL DEFAULT 'unpaid'
+);`;
+            }
+
+            // Default: MySQL 8.0 / MariaDB
+            return `-- MySQL 8.0 / MariaDB Relational Schema (InnoDB + Foreign Keys)
+CREATE TABLE zones (
+    zone_code VARCHAR(5) PRIMARY KEY,
+    zone_name VARCHAR(100) NOT NULL,
+    base_rent DECIMAL(10,2) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE users (
+    user_id VARCHAR(36) PRIMARY KEY,
+    first_name VARCHAR(60) NOT NULL,
+    last_name VARCHAR(60) NOT NULL,
+    full_name VARCHAR(120) NOT NULL,
+    email VARCHAR(120) UNIQUE NOT NULL,
+    phone VARCHAR(25) NOT NULL,
+    password_hash VARCHAR(120) NOT NULL,
+    shop_name VARCHAR(150),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE stalls (
+    stall_id VARCHAR(10) PRIMARY KEY,
+    zone_code VARCHAR(5) NOT NULL,
+    status ENUM('available', 'occupied') NOT NULL DEFAULT 'available',
+    owner_id VARCHAR(36) NULL,
+    booking_shop_name VARCHAR(150),
+    booking_phone VARCHAR(25),
+    product_type VARCHAR(150),
+    CONSTRAINT fk_stalls_zone FOREIGN KEY (zone_code) REFERENCES zones(zone_code) ON UPDATE CASCADE,
+    CONSTRAINT fk_stalls_user FOREIGN KEY (owner_id) REFERENCES users(user_id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE bills (
+    bill_id VARCHAR(20) PRIMARY KEY,
+    billing_month VARCHAR(50) NOT NULL,
+    stall_id VARCHAR(10) NOT NULL,
+    user_id VARCHAR(36) NOT NULL,
+    rent_amount DECIMAL(10,2) NOT NULL,
+    water_units INT NOT NULL DEFAULT 0,
+    water_cost DECIMAL(10,2) NOT NULL DEFAULT 0,
+    elec_units INT NOT NULL DEFAULT 0,
+    elec_cost DECIMAL(10,2) NOT NULL DEFAULT 0,
+    status ENUM('unpaid', 'paid') NOT NULL DEFAULT 'unpaid',
+    CONSTRAINT fk_bills_stall FOREIGN KEY (stall_id) REFERENCES stalls(stall_id) ON DELETE CASCADE,
+    CONSTRAINT fk_bills_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`;
+        }
+
+        function updateSqlSchemaDisplay() {
+            const dialect = document.getElementById('sql-dialect-select')?.value || 'mysql';
+            const labelMap = {
+                mysql: 'MySQL 8.0 / MariaDB',
+                postgres: 'PostgreSQL 16',
+                mssql: 'Microsoft SQL Server'
+            };
+            const labelEl = document.getElementById('ddl-dialect-label');
+            const previewEl = document.getElementById('sql-ddl-preview');
+            if (labelEl) labelEl.textContent = labelMap[dialect];
+            if (previewEl) previewEl.textContent = getSqlDdlByDialect(dialect);
+        }
+
+        function loadSampleQuery(preset) {
+            const input = document.getElementById('sql-query-input');
+            if (!input) return;
+
+            if (preset === 'join_stalls') {
+                input.value = `SELECT s.stall_id, z.zone_name, s.status, u.full_name AS tenant_name, u.shop_name, z.base_rent
+FROM stalls s
+INNER JOIN zones z ON s.zone_code = z.zone_code
+LEFT JOIN users u ON s.owner_id = u.user_id
+WHERE s.status = 'occupied'
+ORDER BY s.stall_id ASC;`;
+            } else if (preset === 'join_bills') {
+                input.value = `SELECT b.bill_id, b.billing_month, b.stall_id, u.full_name, u.phone,
+       b.rent_amount, b.water_cost, b.elec_cost,
+       (b.rent_amount + b.water_cost + b.elec_cost) AS net_total, b.status
+FROM bills b
+INNER JOIN users u ON b.user_id = u.user_id
+ORDER BY b.status DESC, b.bill_id ASC;`;
+            } else if (preset === 'group_zones') {
+                input.value = `SELECT z.zone_code, z.zone_name, z.base_rent,
+       COUNT(s.stall_id) AS total_stalls,
+       SUM(CASE WHEN s.status = 'occupied' THEN 1 ELSE 0 END) AS occupied_count,
+       SUM(CASE WHEN s.status = 'available' THEN 1 ELSE 0 END) AS available_count
+FROM zones z
+LEFT JOIN stalls s ON z.zone_code = s.zone_code
+GROUP BY z.zone_code, z.zone_name, z.base_rent
+ORDER BY z.zone_code ASC;`;
+            }
+            executeCustomSql();
+        }
+
+        function executeCustomSql() {
+            const input = document.getElementById('sql-query-input');
+            const statusEl = document.getElementById('sql-exec-status');
+            const countEl = document.getElementById('sql-result-count');
+            const container = document.getElementById('sql-result-container');
+            if (!input || !container) return;
+
+            const sql = input.value.trim();
+            if (!sql) return;
+
+            if (!sqlDb) {
+                container.innerHTML = '<div class="p-6 text-center text-xs text-rose-600">เอนจิน SQL.js กำลังโหลดหรือไม่พร้อมใช้งานในสภาพแวดล้อมนี้</div>';
+                return;
+            }
+
+            try {
+                const startTime = performance.now();
+                const results = sqlDb.exec(sql);
+                const elapsed = (performance.now() - startTime).toFixed(2);
+
+                // If mutation query (INSERT/UPDATE/DELETE) ran, persist and sync UI
+                if (!/^\s*SELECT/i.test(sql) && !/^\s*PRAGMA/i.test(sql)) {
+                    persistRelationalDatabase();
+                    syncStateFromRelationalDb();
+                    renderStalls();
+                    renderBills();
+                    renderAdminDashboard();
+                }
+
+                if (!results || results.length === 0) {
+                    statusEl.innerHTML = `<span class="text-emerald-600 font-semibold"><i class="fa-solid fa-check mr-1"></i>รันคำสั่งสำเร็จ (${elapsed} ms) • ไม่มีแถวข้อมูลคืนกลับ</span>`;
+                    countEl.textContent = '0 แถว';
+                    container.innerHTML = '<div class="p-6 text-center text-xs text-slate-400">Query executed successfully (0 rows returned)</div>';
+                    return;
+                }
+
+                const { columns, values } = results[0];
+                statusEl.innerHTML = `<span class="text-emerald-600 font-semibold"><i class="fa-solid fa-check mr-1"></i>รันคำสั่งสำเร็จ (${elapsed} ms)</span>`;
+                countEl.textContent = `${values.length} แถว`;
+
+                const thead = `
+                    <thead class="bg-navy-900 text-white text-[11px] font-mono sticky top-0">
+                        <tr>${columns.map(col => `<th class="py-2.5 px-3.5 text-left font-semibold">${col}</th>`).join('')}</tr>
+                    </thead>
+                `;
+                const tbody = `
+                    <tbody class="divide-y divide-slate-200 text-xs font-mono">
+                        ${values.map(row => `
+                            <tr class="hover:bg-slate-50">
+                                ${row.map(val => `<td class="py-2 px-3.5 whitespace-nowrap ${val === null ? 'text-slate-400 italic' : 'text-slate-800'}">${val === null ? 'NULL' : String(val)}</td>`).join('')}
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                `;
+
+                container.innerHTML = `<table class="w-full text-left border-collapse">${thead}${tbody}</table>`;
+            } catch (err) {
+                statusEl.innerHTML = `<span class="text-rose-600 font-semibold"><i class="fa-solid fa-triangle-exclamation mr-1"></i>SQL Error: ${err.message}</span>`;
+                countEl.textContent = 'Error';
+                container.innerHTML = `<div class="p-4 bg-rose-50 text-rose-700 font-mono text-xs">${err.message}</div>`;
+            }
+        }
+
+        function copySqlDdl() {
+            const ddlText = document.getElementById('sql-ddl-preview')?.textContent || '';
+            const temp = document.createElement('textarea');
+            temp.value = ddlText;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand('copy');
+            document.body.removeChild(temp);
+            showToast('คัดลอกคำสั่ง CREATE TABLE (DDL) ลงคลิปบอร์ดแล้ว', 'success');
+        }
+
+        function exportFullSqlDump() {
+            const dialect = document.getElementById('sql-dialect-select')?.value || 'mysql';
+            let dump = getSqlDdlByDialect(dialect) + '\n\n-- ==========================================\n-- INSERT DATA DUMP\n-- ==========================================\n';
+
+            const esc = v => (v === null || v === undefined) ? 'NULL' : `'${String(v).replace(/'/g, "''")}'`;
+
+            DEFAULT_ZONES.forEach(z => {
+                dump += `INSERT INTO zones (zone_code, zone_name, base_rent) VALUES (${esc(z.code)}, ${esc(z.name)}, ${z.rent});\n`;
+            });
+            dump += '\n';
+
+            appState.users.forEach(u => {
+                dump += `INSERT INTO users (user_id, first_name, last_name, full_name, email, phone, password_hash, shop_name) VALUES (${esc(u.id)}, ${esc(u.firstName)}, ${esc(u.lastName)}, ${esc(u.firstName + ' ' + u.lastName)}, ${esc(u.email)}, ${esc(u.phone)}, ${esc(u.password)}, ${esc(u.shopName)});\n`;
+            });
+            dump += '\n';
+
+            appState.stalls.forEach(s => {
+                dump += `INSERT INTO stalls (stall_id, zone_code, status, owner_id, booking_shop_name, booking_phone, product_type) VALUES (${esc(s.id)}, ${esc(s.zone)}, ${esc(s.status)}, ${esc(s.ownerId)}, ${esc(s.shopName)}, ${esc(s.phone)}, ${esc(s.productType)});\n`;
+            });
+            dump += '\n';
+
+            appState.bills.forEach(b => {
+                dump += `INSERT INTO bills (bill_id, billing_month, stall_id, user_id, rent_amount, water_units, water_cost, elec_units, elec_cost, status) VALUES (${esc(b.id)}, ${esc(b.month)}, ${esc(b.stallId)}, ${esc(b.ownerId)}, ${b.rent}, ${b.waterUnits}, ${b.waterCost}, ${b.elecUnits}, ${b.elecCost}, ${esc(b.status)});\n`;
+            });
+
+            const blob = new Blob([dump], { type: 'application/sql;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `tangsiahuad_market_${dialect}.sql`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast(`ดาวน์โหลดไฟล์ tangsiahuad_market_${dialect}.sql เรียบร้อยแล้ว`, 'success');
+        }
+
+        function resetRelationalDatabase() {
+            localStorage.removeItem(SQL_DB_STORAGE_KEY);
+            localStorage.removeItem(CUSTOMER_BACKUP_STORAGE_KEY);
+            appState.receipts = [];
+            if (sqlDb) {
+                sqlDb.run('DROP TABLE IF EXISTS bills; DROP TABLE IF EXISTS stalls; DROP TABLE IF EXISTS users; DROP TABLE IF EXISTS zones;');
+                seedRelationalTables();
+                persistRelationalDatabase();
+                syncStateFromRelationalDb();
+            } else {
+                seedFallbackMemory();
+            }
+            saveCustomerBackup();
+            renderStalls();
+            renderBills();
+            renderCustomerReceipts();
+            renderAdminDashboard();
+            executeCustomSql();
+            showToast('รีเซ็ตฐานข้อมูลและข้อมูลสำรองกลับเป็นค่าเริ่มต้นเรียบร้อยแล้ว', 'info');
+        }
+
+        // Initialize on page load & automatically restore backed-up customer session if active
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initRelationalDatabase();
+            const backup = loadCustomerBackup();
+            if (backup && backup.currentUser) {
+                enterApp(backup.currentUser);
+            }
+        });
+    </script>
+</body>
+</html>
